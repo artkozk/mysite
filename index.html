@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Кожакин Артемий — Developer</title>
+    <title>Кожакин Артемий — Developer Journey</title>
     <meta
       name="description"
-      content="Сайт-визитка разработчика Кожакина Артемия в формате технологического путешествия."
+      content="Иммерсивный сайт-визитка Кожакина Артемия: менторы, клиенты, вау-эффекты и инженерная глубина."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,26 +16,47 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
-    <div class="bg-stack" aria-hidden="true">
-      <div class="terminal-haze">
-        <pre id="terminal-bg-lines" class="terminal-bg-lines"></pre>
-      </div>
-      <div class="earth-layer">
-        <div class="earth-shell" data-depth="14">
-          <iframe
-            title="3D Earth model"
-            loading="lazy"
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            allowfullscreen
-            src="https://sketchfab.com/models/27db6f519be14199b22688fad09a4b43/embed?autostart=1&autospin=0.08&preload=1&ui_infos=0&ui_watermark=1&ui_help=0&ui_settings=0&ui_stop=0&ui_ar=0"
-          ></iframe>
-          <div class="earth-shell__vignette"></div>
+  <body class="is-loading">
+    <div id="preloader" class="preloader">
+      <div class="preloader__core">
+        <div class="preloader__ring"></div>
+        <p class="preloader__label">Launch Sequence</p>
+        <p id="preloader-status" class="preloader__status">Подготовка эффектов...</p>
+        <div class="preloader__bar">
+          <span id="preloader-bar"></span>
         </div>
       </div>
-      <span class="orb orb--one" data-depth="9"></span>
-      <span class="orb orb--two" data-depth="-7"></span>
-      <span class="orb orb--three" data-depth="13"></span>
+    </div>
+
+    <div class="bg-world" aria-hidden="true">
+      <canvas id="earth-canvas"></canvas>
+      <div class="earth-horizon"></div>
+
+      <div class="video-ribbon video-ribbon--top">
+        <video
+          preload="auto"
+          muted
+          loop
+          autoplay
+          playsinline
+          src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-city-at-night-11716-large.mp4"
+        ></video>
+      </div>
+      <div class="video-ribbon video-ribbon--bottom">
+        <video
+          preload="auto"
+          muted
+          loop
+          autoplay
+          playsinline
+          src="https://assets.mixkit.co/videos/preview/mixkit-glowing-particles-in-a-dark-background-9967-large.mp4"
+        ></video>
+      </div>
+
+      <pre id="terminal-stream" class="terminal-stream"></pre>
+      <span class="fog fog--a" data-depth="9"></span>
+      <span class="fog fog--b" data-depth="-7"></span>
+      <span class="fog fog--c" data-depth="14"></span>
     </div>
 
     <header class="site-header">
@@ -45,120 +66,171 @@
           <span class="brand__name">Artemy Kozhakin</span>
         </a>
         <nav class="nav">
-          <a href="#about">Подход</a>
-          <a href="#skills">Экспертиза</a>
-          <a href="#contacts">Контакты</a>
+          <a href="#mentors">Менторы</a>
+          <a href="#clients">Клиенты</a>
+          <a href="#contacts">Контакт</a>
         </nav>
       </div>
     </header>
 
     <main id="home" class="journey container">
-      <section class="chapter chapter--hero reveal">
-        <article class="card card--intro">
-          <p class="eyebrow">Launch Sequence</p>
+      <section class="scene scene--hero reveal">
+        <article class="hero-intro">
+          <p class="eyebrow">Immersive Portfolio</p>
           <h1>
             Кожакин Артемий
-            <span>я собираю продукт как космическую миссию: красиво, точно, без права на отказ</span>
+            <span>превращаю сложные IT-задачи в эффектные и надёжные продукты</span>
           </h1>
-          <p class="lead">
-            Здесь не просто портфолио. Это инженерное путешествие, где каждый экран
-            показывает мой подход: смелый визуал, строгая архитектура, результат в
-            production.
+          <p>
+            Мой стиль: дерзкий визуал, строгая инженерия и опыт работы в связке с
+            менторами и клиентами. Этот сайт — как миссия: каждый следующий экран
+            раскрывает новый уровень.
           </p>
-          <div class="actions">
-            <a class="btn btn--solid magnetic" href="#contacts">Обсудить проект</a>
-            <a class="btn btn--ghost magnetic" href="#skills">Смотреть экспертизу</a>
+          <div class="hero-actions">
+            <a class="btn btn--solid magnetic" href="#contacts">Запустить проект</a>
+            <a class="btn btn--ghost magnetic" href="#clients">Смотреть результаты</a>
           </div>
         </article>
-        <article class="card card--signal tilt" data-delay="70">
-          <p class="eyebrow">Telemetry</p>
-          <h2>Дерзкий визуал, дисциплинированный код</h2>
-          <ul class="signal-list">
-            <li><span>Frontend</span><b>High-Fidelity Motion</b></li>
-            <li><span>Backend</span><b>Stable APIs</b></li>
-            <li><span>Architecture</span><b>System-first</b></li>
-            <li><span>Delivery</span><b>Fast, clear, reliable</b></li>
-          </ul>
+
+        <article class="hero-telemetry tilt" data-delay="90">
+          <p class="eyebrow">Realtime Telemetry</p>
+          <div class="telemetry-grid">
+            <div>
+              <span>Interface Impact</span>
+              <b>WOW x Trust</b>
+            </div>
+            <div>
+              <span>Mentor Feedback Loop</span>
+              <b>Weekly Iterations</b>
+            </div>
+            <div>
+              <span>Client Delivery</span>
+              <b>Production Focus</b>
+            </div>
+            <div>
+              <span>Architecture Health</span>
+              <b>Stable Core</b>
+            </div>
+          </div>
         </article>
       </section>
 
-      <section id="about" class="chapter chapter--drift reveal">
-        <article class="card card--left tilt">
-          <p class="eyebrow">Orbit I</p>
-          <h2>Я не продаю макеты. Я проектирую доверие к продукту.</h2>
-          <p>
-            Визуальная сила без инженерной глубины не работает. Поэтому я строю
-            интерфейсы, где эстетика усиливает логику, а не маскирует её.
-          </p>
+      <section id="mentors" class="scene scene--mentors reveal">
+        <article class="mentor-orbit">
+          <p class="eyebrow">Mentor Constellation</p>
+          <h2>Работаю с менторами как с навигационной системой роста</h2>
+          <div class="orbit-field">
+            <button
+              class="orbit-node is-active"
+              data-title="Архитектурный менторинг"
+              data-copy="Разбираем системный дизайн, граничные сценарии и масштабирование решений."
+            >
+              Архитектура
+            </button>
+            <button
+              class="orbit-node"
+              data-title="Frontend ревью"
+              data-copy="Полируем motion, композицию и производительность до уровня сильного коммерческого продукта."
+            >
+              Frontend
+            </button>
+            <button
+              class="orbit-node"
+              data-title="Backend практика"
+              data-copy="Укрепляю API и интеграции: отказоустойчивость, безопасность, контроль ошибок."
+            >
+              Backend
+            </button>
+            <button
+              class="orbit-node"
+              data-title="Product thinking"
+              data-copy="С ментором по продукту связываю код с метриками и ценностью для клиента."
+            >
+              Product
+            </button>
+          </div>
         </article>
-        <article class="card card--right tilt" data-delay="90">
-          <p class="eyebrow">Orbit II</p>
-          <h3>Моя рабочая философия</h3>
-          <p>1. Сначала архитектурный каркас, затем визуальный характер.</p>
-          <p>2. Каждый эффект работает на доверие, а не просто на шоу.</p>
-          <p>3. В продакшн уходит только то, что выдерживает нагрузку.</p>
+
+        <article class="mentor-log tilt">
+          <p class="eyebrow">Live Sync</p>
+          <h3 id="mentor-title">Архитектурный менторинг</h3>
+          <p id="mentor-copy">
+            Разбираем системный дизайн, граничные сценарии и масштабирование решений.
+          </p>
+          <p class="mentor-tip">Нажимай на узлы орбиты, чтобы переключать фокус.</p>
         </article>
       </section>
 
-      <section id="skills" class="chapter chapter--zigzag reveal">
-        <article class="card card--skill card--skill-a tilt">
-          <p class="chip">Frontend Engineering</p>
-          <h3>React/Next.js + premium motion</h3>
+      <section id="clients" class="scene scene--clients reveal">
+        <article class="clients-banner tilt">
+          <p class="eyebrow">Client Impact</p>
+          <h2>С клиентами я говорю языком эффекта, а не абстракций</h2>
           <p>
-            Проектирую интерфейсы с характером: плавно, выразительно, производительно.
+            Отдаю не «просто сайт», а инструмент, который усиливает бренд и даёт
+            измеримый результат: вовлечённость, доверие, конверсию.
           </p>
         </article>
-        <article class="card card--skill card--skill-b tilt" data-delay="60">
-          <p class="chip">Backend & API</p>
-          <h3>Надёжная сервисная часть</h3>
-          <p>
-            Интеграции, безопасность, устойчивые API и предсказуемое поведение под
-            нагрузкой.
-          </p>
-        </article>
-        <article class="card card--skill card--skill-c tilt" data-delay="120">
-          <p class="chip">Product Delivery</p>
-          <h3>От задачи до измеримого эффекта</h3>
-          <p>
-            Работаю в темпе бизнеса: быстрые итерации, прозрачные этапы, сильный финал.
-          </p>
+
+        <article class="impact-track">
+          <div class="marquee">
+            <span>
+              premium motion • reliable architecture • mentor-driven quality • client-focused delivery •
+              premium motion • reliable architecture • mentor-driven quality • client-focused delivery •
+            </span>
+          </div>
+          <div class="impact-shapes">
+            <div class="impact-shape impact-shape--a tilt">
+              <h3>Discovery</h3>
+              <p>Погружение в задачу клиента и контекст бизнеса.</p>
+            </div>
+            <div class="impact-shape impact-shape--b tilt">
+              <h3>Build</h3>
+              <p>Сильная реализация с постоянным фидбеком от менторов.</p>
+            </div>
+            <div class="impact-shape impact-shape--c tilt">
+              <h3>Scale</h3>
+              <p>Запуск, контроль качества и дальнейшее развитие.</p>
+            </div>
+          </div>
         </article>
       </section>
 
-      <section class="chapter chapter--route reveal">
-        <article class="card card--route">
-          <p class="eyebrow">Flight Plan</p>
-          <h2>Как проходит совместная работа</h2>
-          <div class="route-grid">
+      <section class="scene scene--route reveal">
+        <article class="route-lab">
+          <p class="eyebrow">Mission Route</p>
+          <h2>Каждый этап работы ощущается как отдельная сцена</h2>
+          <div class="route-path">
             <div class="route-step tilt">
               <span>01</span>
-              <p>Декомпозиция задачи и карта рисков.</p>
+              <p>Брифинг, цели, ограничения, риски.</p>
             </div>
             <div class="route-step tilt">
               <span>02</span>
-              <p>Проектирование архитектуры и UX-логики.</p>
+              <p>Прототипы, архитектура и визуальная стратегия.</p>
             </div>
             <div class="route-step tilt">
               <span>03</span>
-              <p>Реализация, проверка, оптимизация, выпуск.</p>
+              <p>Итерационная разработка с менторской валидацией.</p>
             </div>
             <div class="route-step tilt">
               <span>04</span>
-              <p>Поддержка и рост продукта после запуска.</p>
+              <p>Release, аналитика и развитие после запуска.</p>
             </div>
           </div>
         </article>
       </section>
 
-      <section id="contacts" class="chapter chapter--contact reveal">
-        <article class="card card--contact">
+      <section id="contacts" class="scene scene--finale reveal">
+        <article class="finale-core">
           <p class="eyebrow">Docking Port</p>
-          <h2>Если проект должен быть запоминающимся и надёжным — давай соберём его вместе</h2>
+          <h2>
+            Хочешь проект, который вовлекает с первого экрана и остаётся в памяти?
+          </h2>
           <p>
-            Присылай текущую задачу. Я предложу технический вектор и доведу его до
-            результата, который выглядит на уровне и работает без компромиссов.
+            Пиши. Вместе сделаем продукт, где эффектность и профессионализм не
+            спорят, а усиливают друг друга.
           </p>
-          <div class="actions">
+          <div class="hero-actions">
             <a class="btn btn--solid magnetic" href="mailto:artemy@devmail.pro"
               >Написать на Email</a
             >
@@ -185,6 +257,6 @@
       </div>
     </footer>
 
-    <script src="./script.js"></script>
+    <script type="module" src="./script.js"></script>
   </body>
 </html>
