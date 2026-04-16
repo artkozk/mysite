@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Кожакин Артемий — Developer</title>
+    <meta
+      name="description"
+      content="Премиальный сайт-визитка разработчика Кожакина Артемия."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Syne:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="ambient">
+      <span class="orb orb--one" data-depth="10"></span>
+      <span class="orb orb--two" data-depth="-8"></span>
+      <span class="orb orb--three" data-depth="14"></span>
+    </div>
+
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="#home">
+          <span class="brand__mono">AK</span>
+          <span class="brand__name">Artemy Kozhakin</span>
+        </a>
+        <nav class="nav">
+          <a href="#about">Обо мне</a>
+          <a href="#skills">Экспертиза</a>
+          <a href="#contacts">Контакты</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="home">
+      <section class="hero container">
+        <div class="hero__copy reveal">
+          <p class="eyebrow">Developer Portfolio</p>
+          <h1>
+            Кожакин Артемий
+            <span>создаю инженерные продукты, которым доверяют</span>
+          </h1>
+          <p class="hero__lead">
+            Разрабатываю интерфейсы и архитектуру уровня production: точно, быстро
+            и с фокусом на бизнес-результат. Этот сайт собран как демонстрация
+            моего подхода к качеству, деталям и визуальной культуре.
+          </p>
+          <div class="hero__cta">
+            <a class="btn btn--solid magnetic" href="#contacts">Обсудить проект</a>
+            <a class="btn btn--ghost magnetic" href="#skills">Смотреть экспертизу</a>
+          </div>
+        </div>
+        <div class="hero__panel reveal tilt" data-delay="80">
+          <div class="panel__header">
+            <span class="dot dot--red"></span>
+            <span class="dot dot--yellow"></span>
+            <span class="dot dot--green"></span>
+          </div>
+          <div class="panel__content">
+            <p class="signal">status: <strong>available for high-impact work</strong></p>
+            <ul class="signal-list">
+              <li><span>Архитектура</span><b>System-first</b></li>
+              <li><span>Frontend</span><b>Motion + Performance</b></li>
+              <li><span>Backend</span><b>Reliable APIs</b></li>
+              <li><span>Delivery</span><b>Clean, predictable, fast</b></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section container reveal">
+        <div class="section__intro">
+          <p class="eyebrow">Подход</p>
+          <h2>Технологичность, эстетика, ответственность</h2>
+        </div>
+        <div class="trust-grid">
+          <article class="trust-card tilt">
+            <h3>Системное мышление</h3>
+            <p>
+              Проектирую решения так, чтобы масштабирование не ломало продукт, а
+              усиливало его.
+            </p>
+          </article>
+          <article class="trust-card tilt">
+            <h3>Инженерная дисциплина</h3>
+            <p>
+              Чёткая структура кода, тестируемость, предсказуемые релизы и
+              прозрачные этапы работы.
+            </p>
+          </article>
+          <article class="trust-card tilt">
+            <h3>Визуальная точность</h3>
+            <p>
+              Интерфейсы с характером: динамика, аккуратные детали, премиальное
+              ощущение в каждой микровзаимодействии.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="skills" class="section container reveal">
+        <div class="section__intro">
+          <p class="eyebrow">Экспертиза</p>
+          <h2>Что я делаю на высоком уровне</h2>
+        </div>
+        <div class="skills-grid">
+          <article class="skill-card tilt">
+            <p class="skill-card__title">Frontend Engineering</p>
+            <p>
+              React/Next.js, производительные UI, анимации и UX, которые усиливают
+              бренд, а не мешают скорости.
+            </p>
+          </article>
+          <article class="skill-card tilt">
+            <p class="skill-card__title">Backend & API</p>
+            <p>
+              Надёжные API, интеграции, безопасность и инфраструктурная логика для
+              стабильных продуктов.
+            </p>
+          </article>
+          <article class="skill-card tilt">
+            <p class="skill-card__title">Product Delivery</p>
+            <p>
+              Веду от идеи до результата: от архитектуры и кода до запуска и
+              развития продукта.
+            </p>
+          </article>
+          <article class="skill-card tilt">
+            <p class="skill-card__title">Visual Experience</p>
+            <p>
+              Премиальная визуальная подача через свет, глубину, motion-сценарии и
+              тщательно выстроенную композицию.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section container reveal">
+        <div class="section__intro">
+          <p class="eyebrow">Workflow</p>
+          <h2>Как строится работа</h2>
+        </div>
+        <ol class="timeline">
+          <li class="timeline__item tilt">
+            <span>01</span>
+            <div>
+              <h3>Погружение в задачу</h3>
+              <p>Аудит контекста, требований и рисков, чтобы сразу двигаться точно.</p>
+            </div>
+          </li>
+          <li class="timeline__item tilt">
+            <span>02</span>
+            <div>
+              <h3>Архитектура и прототип</h3>
+              <p>Формирую фундамент решения: структуру, технологии, этапы поставки.</p>
+            </div>
+          </li>
+          <li class="timeline__item tilt">
+            <span>03</span>
+            <div>
+              <h3>Реализация</h3>
+              <p>Пишу чистый код, создаю выразительный интерфейс, контролирую качество.</p>
+            </div>
+          </li>
+          <li class="timeline__item tilt">
+            <span>04</span>
+            <div>
+              <h3>Запуск и развитие</h3>
+              <p>Довожу проект до production-результата и помогаю в следующем росте.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="contacts" class="section container reveal">
+        <div class="cta">
+          <p class="eyebrow">Контакт</p>
+          <h2>Готов усиливать продукт, где важны скорость, качество и доверие</h2>
+          <p>
+            Напиши мне с задачей, и я предложу технический вектор, который даст
+            сильный бизнес-эффект.
+          </p>
+          <div class="hero__cta">
+            <a class="btn btn--solid magnetic" href="mailto:artemy@devmail.pro"
+              >Написать на Email</a
+            >
+            <a class="btn btn--ghost magnetic" href="https://t.me/artemy_dev"
+              >Telegram</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__content">
+        <p>© <span id="year"></span> Кожакин Артемий. Crafted with precision.</p>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
