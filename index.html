@@ -6,21 +6,21 @@
     <title>Кожакин Артемий — Developer</title>
     <meta
       name="description"
-      content="Премиальный сайт-визитка разработчика Кожакина Артемия."
+      content="Сайт-визитка разработчика Кожакина Артемия: дерзкий, технологичный, премиальный."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Syne:wght@500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Manrope:wght@400;500;700;800&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="ambient">
-      <span class="orb orb--one" data-depth="10"></span>
+      <span class="orb orb--one" data-depth="11"></span>
       <span class="orb orb--two" data-depth="-8"></span>
-      <span class="orb orb--three" data-depth="14"></span>
+      <span class="orb orb--three" data-depth="15"></span>
     </div>
 
     <header class="site-header">
@@ -30,162 +30,136 @@
           <span class="brand__name">Artemy Kozhakin</span>
         </a>
         <nav class="nav">
-          <a href="#about">Обо мне</a>
+          <a href="#about">Подход</a>
           <a href="#skills">Экспертиза</a>
           <a href="#contacts">Контакты</a>
         </nav>
       </div>
     </header>
 
-    <main id="home">
-      <section class="hero container">
-        <div class="hero__copy reveal">
-          <p class="eyebrow">Developer Portfolio</p>
+    <main id="home" class="container page">
+      <section class="mosaic">
+        <article class="card card--hero reveal">
+          <p class="eyebrow">Independent Developer</p>
           <h1>
             Кожакин Артемий
-            <span>создаю инженерные продукты, которым доверяют</span>
+            <span>строю цифровые продукты, которые выглядят дорого и работают без компромиссов</span>
           </h1>
-          <p class="hero__lead">
-            Разрабатываю интерфейсы и архитектуру уровня production: точно, быстро
-            и с фокусом на бизнес-результат. Этот сайт собран как демонстрация
-            моего подхода к качеству, деталям и визуальной культуре.
+          <p class="lead">
+            Я соединяю архитектуру, сильный визуал и чистый delivery. Результат:
+            интерфейсы, которые вызывают вау-эффект и удерживают доверие.
           </p>
-          <div class="hero__cta">
+          <div class="actions">
             <a class="btn btn--solid magnetic" href="#contacts">Обсудить проект</a>
             <a class="btn btn--ghost magnetic" href="#skills">Смотреть экспертизу</a>
           </div>
-        </div>
-        <div class="hero__panel reveal tilt" data-delay="80">
-          <div class="panel__header">
-            <span class="dot dot--red"></span>
-            <span class="dot dot--yellow"></span>
-            <span class="dot dot--green"></span>
+        </article>
+
+        <article class="card card--stats reveal tilt" data-delay="70">
+          <p class="eyebrow">Execution Pulse</p>
+          <h2>Дерзко по визуалу, строго по инженерии</h2>
+          <ul class="metric-list">
+            <li><span>System Design</span><b>High confidence</b></li>
+            <li><span>Frontend Motion</span><b>Signature quality</b></li>
+            <li><span>Backend Reliability</span><b>Production grade</b></li>
+            <li><span>Delivery Speed</span><b>Fast and predictable</b></li>
+          </ul>
+        </article>
+
+        <article id="skills" class="card card--terminal reveal tilt" data-delay="120">
+          <div class="terminal-top">
+            <div class="dots">
+              <span class="dot dot--red"></span>
+              <span class="dot dot--yellow"></span>
+              <span class="dot dot--green"></span>
+            </div>
+            <p>live/session::archemy</p>
           </div>
-          <div class="panel__content">
-            <p class="signal">status: <strong>available for high-impact work</strong></p>
-            <ul class="signal-list">
-              <li><span>Архитектура</span><b>System-first</b></li>
-              <li><span>Frontend</span><b>Motion + Performance</b></li>
-              <li><span>Backend</span><b>Reliable APIs</b></li>
-              <li><span>Delivery</span><b>Clean, predictable, fast</b></li>
+          <div class="terminal-body">
+            <ul class="stream-lines" id="stream-lines">
+              <li>boot::loading production mindset...</li>
+              <li>$ init architecture --stable --scalable</li>
+              <li>$ craft-ui --motion --performance</li>
+              <li>$ optimize api --latency --security</li>
+              <li>$ deploy --clean --observable</li>
             </ul>
+            <p class="live-line">
+              <span class="prompt">artemy@rocket:~$</span>
+              <span id="live-command"></span>
+              <span class="cursor" aria-hidden="true"></span>
+            </p>
           </div>
-        </div>
-      </section>
+        </article>
 
-      <section id="about" class="section container reveal">
-        <div class="section__intro">
+        <article class="card card--porthole reveal tilt" data-delay="160">
+          <p class="eyebrow">Orbital View</p>
+          <h2>Смотрю на продукт сверху, действую точечно внизу</h2>
+          <div class="porthole" data-depth="18" aria-hidden="true">
+            <div class="stars"></div>
+            <div class="earth">
+              <span class="earth__ocean"></span>
+              <span class="earth__land"></span>
+              <span class="earth__clouds"></span>
+              <span class="earth__rim"></span>
+            </div>
+            <div class="glass-reflection"></div>
+          </div>
+        </article>
+
+        <article id="about" class="card card--about reveal">
           <p class="eyebrow">Подход</p>
-          <h2>Технологичность, эстетика, ответственность</h2>
-        </div>
-        <div class="trust-grid">
-          <article class="trust-card tilt">
-            <h3>Системное мышление</h3>
-            <p>
-              Проектирую решения так, чтобы масштабирование не ломало продукт, а
-              усиливало его.
-            </p>
-          </article>
-          <article class="trust-card tilt">
-            <h3>Инженерная дисциплина</h3>
-            <p>
-              Чёткая структура кода, тестируемость, предсказуемые релизы и
-              прозрачные этапы работы.
-            </p>
-          </article>
-          <article class="trust-card tilt">
-            <h3>Визуальная точность</h3>
-            <p>
-              Интерфейсы с характером: динамика, аккуратные детали, премиальное
-              ощущение в каждой микровзаимодействии.
-            </p>
-          </article>
-        </div>
-      </section>
+          <h2>Запоминающийся продукт начинается с чётких инженерных решений</h2>
+          <div class="about-grid">
+            <div class="about-pill tilt">
+              <h3>Системное мышление</h3>
+              <p>Проектирую архитектуру, которая выдерживает рост и нагрузку.</p>
+            </div>
+            <div class="about-pill tilt">
+              <h3>Премиальная подача</h3>
+              <p>Делаю визуал, который подчёркивает ценность бренда и продукта.</p>
+            </div>
+            <div class="about-pill tilt">
+              <h3>Ответственный delivery</h3>
+              <p>Чёткие этапы, прозрачная коммуникация, прогнозируемый результат.</p>
+            </div>
+          </div>
+        </article>
 
-      <section id="skills" class="section container reveal">
-        <div class="section__intro">
-          <p class="eyebrow">Экспертиза</p>
-          <h2>Что я делаю на высоком уровне</h2>
-        </div>
-        <div class="skills-grid">
-          <article class="skill-card tilt">
-            <p class="skill-card__title">Frontend Engineering</p>
-            <p>
-              React/Next.js, производительные UI, анимации и UX, которые усиливают
-              бренд, а не мешают скорости.
-            </p>
-          </article>
-          <article class="skill-card tilt">
-            <p class="skill-card__title">Backend & API</p>
-            <p>
-              Надёжные API, интеграции, безопасность и инфраструктурная логика для
-              стабильных продуктов.
-            </p>
-          </article>
-          <article class="skill-card tilt">
-            <p class="skill-card__title">Product Delivery</p>
-            <p>
-              Веду от идеи до результата: от архитектуры и кода до запуска и
-              развития продукта.
-            </p>
-          </article>
-          <article class="skill-card tilt">
-            <p class="skill-card__title">Visual Experience</p>
-            <p>
-              Премиальная визуальная подача через свет, глубину, motion-сценарии и
-              тщательно выстроенную композицию.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section container reveal">
-        <div class="section__intro">
-          <p class="eyebrow">Workflow</p>
-          <h2>Как строится работа</h2>
-        </div>
-        <ol class="timeline">
-          <li class="timeline__item tilt">
-            <span>01</span>
-            <div>
-              <h3>Погружение в задачу</h3>
-              <p>Аудит контекста, требований и рисков, чтобы сразу двигаться точно.</p>
-            </div>
-          </li>
-          <li class="timeline__item tilt">
-            <span>02</span>
-            <div>
-              <h3>Архитектура и прототип</h3>
-              <p>Формирую фундамент решения: структуру, технологии, этапы поставки.</p>
-            </div>
-          </li>
-          <li class="timeline__item tilt">
-            <span>03</span>
-            <div>
-              <h3>Реализация</h3>
-              <p>Пишу чистый код, создаю выразительный интерфейс, контролирую качество.</p>
-            </div>
-          </li>
-          <li class="timeline__item tilt">
-            <span>04</span>
-            <div>
-              <h3>Запуск и развитие</h3>
-              <p>Довожу проект до production-результата и помогаю в следующем росте.</p>
-            </div>
-          </li>
-        </ol>
-      </section>
-
-      <section id="contacts" class="section container reveal">
-        <div class="cta">
-          <p class="eyebrow">Контакт</p>
-          <h2>Готов усиливать продукт, где важны скорость, качество и доверие</h2>
+        <article class="card card--expertise reveal tilt" data-delay="50">
+          <p class="chip">Frontend</p>
+          <h3>React/Next.js + motion</h3>
           <p>
-            Напиши мне с задачей, и я предложу технический вектор, который даст
-            сильный бизнес-эффект.
+            Интерфейсы с характером: анимации, композиция и скорость на уровне
+            коммерческих продуктов.
           </p>
-          <div class="hero__cta">
+        </article>
+
+        <article class="card card--expertise reveal tilt" data-delay="90">
+          <p class="chip">Backend</p>
+          <h3>API и интеграции</h3>
+          <p>
+            Надёжные сервисы, безопасные интеграции, продуманная структура данных
+            и предсказуемая работа под нагрузкой.
+          </p>
+        </article>
+
+        <article class="card card--expertise reveal tilt" data-delay="130">
+          <p class="chip">Product</p>
+          <h3>От идеи до запуска</h3>
+          <p>
+            Соединяю бизнес-цель и техническую реализацию так, чтобы релиз давал
+            реальный эффект, а не просто красивый демо-экран.
+          </p>
+        </article>
+
+        <article id="contacts" class="card card--contact reveal">
+          <p class="eyebrow">Контакт</p>
+          <h2>Готов включаться в задачи, где важны класс, скорость и доверие</h2>
+          <p>
+            Пиши с идеей или текущей болью продукта. Я предложу технический вектор
+            и доведу его до сильного результата.
+          </p>
+          <div class="actions">
             <a class="btn btn--solid magnetic" href="mailto:artemy@devmail.pro"
               >Написать на Email</a
             >
@@ -193,13 +167,13 @@
               >Telegram</a
             >
           </div>
-        </div>
+        </article>
       </section>
     </main>
 
     <footer class="footer">
       <div class="container footer__content">
-        <p>© <span id="year"></span> Кожакин Артемий. Crafted with precision.</p>
+        <p>© <span id="year"></span> Кожакин Артемий. Premium engineering statement.</p>
       </div>
     </footer>
 
