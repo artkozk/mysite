@@ -14,9 +14,28 @@
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Manrope:wght@400;500;700;800&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260417-fix18" />
+    <style>
+      body {
+        margin: 0;
+        background: #020613;
+      }
+      body.show-preloader .site-header,
+      body.show-preloader .journey,
+      body.show-preloader .footer {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        opacity: 1;
+        visibility: visible;
+      }
+    </style>
+    <link rel="stylesheet" href="./styles.css?v=20260418-fix20" />
   </head>
-  <body class="theme-earth">
+  <body class="theme-earth show-preloader js-ready">
     <div id="preloader" class="preloader">
       <canvas id="preloader-canvas"></canvas>
       <div class="preloader__veil"></div>
@@ -87,14 +106,15 @@
     <main id="home" class="journey container">
       <section class="scene scene--hero reveal">
         <article class="hero-intro panel fx-aurora fx-pulse">
-          <p class="eyebrow">Immersive Portfolio</p>
+          <p class="eyebrow">Портфолио полного цикла</p>
           <h1>
             Артемий Кожакин
             <span>руковожу digital и IT‑проектами: от идеи и архитектуры до релиза и масштабирования</span>
           </h1>
           <p>
             Работаю с менторами и клиентами в едином контуре: глубоко понимаю устройство продукта
-            изнутри, выстраиваю процесс команды и довожу инициативы до измеримого результата.
+            изнутри, выстраиваю процесс команды и довожу инициативы до измеримого результата, включая
+            грантовые и социально-значимые проекты.
           </p>
           <div class="hero-actions">
             <a class="btn btn--solid magnetic" href="#contacts">Запустить проект</a>
@@ -103,7 +123,7 @@
         </article>
 
         <article class="hero-telemetry panel fx-prism reveal" data-delay="80">
-          <p class="eyebrow">Realtime Telemetry</p>
+          <p class="eyebrow">Ключевые акценты</p>
           <div class="telemetry-grid">
             <div><span>Роль</span><b>Team Lead / PM / Product</b></div>
             <div><span>Подход</span><b>Mentor-driven delivery</b></div>
@@ -154,7 +174,7 @@
         </article>
 
         <article class="mentor-log panel fx-neon">
-          <p class="eyebrow">Mentor Constellation</p>
+          <p class="eyebrow">Фокус текущей сессии</p>
           <h3 id="mentor-title">Архитектурный менторинг</h3>
           <p id="mentor-copy">
             Разбираем системный дизайн, граничные сценарии и масштабирование решений.
@@ -170,7 +190,7 @@
 
       <section id="code" class="scene scene--code reveal">
         <article class="code-lab panel fx-code">
-          <p class="eyebrow">Code Stream</p>
+          <p class="eyebrow">Инженерный поток</p>
           <h2>Код оживает в потоке команд и инженерных решений</h2>
           <div class="code-stage">
             <pre id="live-code" class="live-code"></pre>
@@ -183,22 +203,26 @@
           </div>
         </article>
 
-        <article class="code-output panel fx-prism">
-          <p class="eyebrow">Execution Pulse</p>
-          <p id="runtime-headline">Ожидаю новую команду...</p>
-          <div id="runtime-controls" class="runtime-controls">
-            <button class="runtime-chip is-active" data-track="all">ALL</button>
-            <button class="runtime-chip" data-track="frontend">FRONT</button>
-            <button class="runtime-chip" data-track="backend">BACK</button>
-            <button class="runtime-chip" data-track="client">CLIENT</button>
+        <article class="project-showcase panel fx-prism" id="project-showcase">
+          <p class="eyebrow">Проекты и результат</p>
+          <h3 id="project-focus-title">GrantFlow — грантовая платформа для молодых команд</h3>
+          <p id="project-focus-summary">
+            Платформа в формате ленты, где школьники, студенты и молодые энтузиасты публикуют проекты,
+            находят команду и получают экспертную поддержку.
+          </p>
+          <div class="project-switch">
+            <button class="project-chip is-active" data-project="grantflow">GrantFlow</button>
+            <button class="project-chip" data-project="mentorops">MentorOps</button>
+            <button class="project-chip" data-project="media">Media Growth</button>
           </div>
-          <ul id="runtime-list" class="runtime-list"></ul>
+          <ul id="project-focus-points" class="project-focus-points"></ul>
+          <p id="project-focus-impact" class="project-focus-impact"></p>
         </article>
       </section>
 
       <section id="clients" class="scene scene--clients reveal">
         <article class="clients-banner panel fx-ember">
-          <p class="eyebrow">Client Impact</p>
+          <p class="eyebrow">Польза для клиента</p>
           <h2 data-type-text="С клиентами говорю языком результата: сроков, качества и развития продукта">
             С клиентами говорю языком результата: сроков, качества и развития продукта
           </h2>
@@ -224,7 +248,7 @@
 
       <section id="evidence" class="scene scene--evidence reveal">
         <article class="evidence-metrics panel fx-aurora">
-          <p class="eyebrow">Proof Pack</p>
+          <p class="eyebrow">Экспертиза в действии</p>
           <h2 data-type-text="Моя сила — соединять код, продукт и управление в одну рабочую систему">
             Моя сила — соединять код, продукт и управление в одну рабочую систему
           </h2>
@@ -253,7 +277,7 @@
         </article>
 
         <article class="evidence-framework panel fx-prism">
-          <p class="eyebrow">Case Framework</p>
+          <p class="eyebrow">Принцип работы</p>
           <h3>Как я оформляю результат в кейс, чтобы ему верили</h3>
           <ul class="framework-list">
             <li><b>Контекст:</b> бизнес-цель, ограничения и ставка проекта.</li>
@@ -320,7 +344,7 @@
 
       <section class="scene scene--proof-feed reveal">
         <article class="proof-feed panel fx-prism">
-          <p class="eyebrow">Trust Layer</p>
+          <p class="eyebrow">Смежные сервисы</p>
           <h2 data-type-text="Смежные сервисы вокруг продукта: разработка, управление, продвижение">
             Смежные сервисы вокруг продукта: разработка, управление, продвижение
           </h2>
@@ -347,7 +371,7 @@
 
       <section class="scene scene--route reveal">
         <article class="route-lab panel fx-grid">
-          <p class="eyebrow">Mission Route</p>
+          <p class="eyebrow">Путь проекта</p>
           <h2 data-type-text="Каждый этап — отдельная сцена с конкретным результатом">
             Каждый этап — отдельная сцена с конкретным результатом
           </h2>
@@ -363,26 +387,26 @@
 
       <section id="planet-lab" class="scene scene--planet-lab reveal">
         <article class="planet-lab panel fx-neon">
-          <p class="eyebrow">Planetary Systems</p>
-          <h2>Каждая планета — отдельный режим подачи, чтобы проект ощущался как путешествие</h2>
+          <p class="eyebrow">Космическая навигация</p>
+          <h2>Выбирай миры вращением сцены и переключайся между режимами портфолио</h2>
           <p>
-            Вращай систему, выбирай мир и входи в новую визуальную вселенную: другой свет,
-            динамика сцены и характер интерфейса.
+            Здесь тема меняется как в путешествии по галактике: другой свет, другая динамика и другое
+            эмоциональное ощущение проекта.
           </p>
-          <p id="planet-status" class="planet-status">Текущая система: Earth Core</p>
-          <p class="planet-tip">Смена темы идёт через космос — не кнопкой, а перелётом.</p>
+          <p id="planet-status" class="planet-status">Активный мир: система Земли</p>
+          <p class="planet-tip">Поверни сцену, выбери планету и почувствуй плавный межзвёздный переход.</p>
         </article>
       </section>
 
       <section id="contacts" class="scene scene--finale reveal">
         <article class="finale-core panel fx-ember fx-pulse">
-          <p class="eyebrow">Docking Port</p>
-          <h2 data-type-text="Если нужен руководитель, который соберёт идею, команду и результат — на связи">
-            Если нужен руководитель, который соберёт идею, команду и результат — на связи
+          <p class="eyebrow">Связаться со мной</p>
+          <h2 data-type-text="Нужен сильный руководитель проекта? Соберу идею, команду и доведу до результата">
+            Нужен сильный руководитель проекта? Соберу идею, команду и доведу до результата
           </h2>
           <p>
-            Берусь за задачи на стыке разработки, продукта, автоматизации и продвижения.
-            Если кейс сложный и нестандартный — это особенно интересно.
+            Работаю на стыке разработки, продукта, автоматизации и продвижения. Беру ответственность
+            за delivery, качество и конечный бизнес-эффект.
           </p>
           <div class="hero-actions">
             <a class="btn btn--solid magnetic" href="mailto:artemy@devmail.pro">Email</a>
@@ -404,7 +428,11 @@
           >
           and textures from
           <a href="https://threejs.org/examples/#webgl_shaders_ocean" target="_blank" rel="noreferrer noopener"
-            >three.js Earth maps</a
+            >three.js</a
+          >
+          /
+          <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer noopener"
+            >Solar System Scope</a
           >.
         </p>
       </div>
@@ -433,6 +461,6 @@
         });
       })();
     </script>
-    <script type="module" src="./script.js?v=20260417-fix18"></script>
+    <script type="module" src="./script.js?v=20260418-fix20"></script>
   </body>
 </html>

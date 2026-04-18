@@ -23,17 +23,17 @@ const themeMap = {
   earth: {
     bodyClass: "theme-earth",
     accent: 0x66abff,
-    label: "Earth Core"
+    label: "Система Земли"
   },
   neon: {
     bodyClass: "theme-neon",
     accent: 0x66ffe8,
-    label: "Neon Drift"
+    label: "Бирюзовая орбита"
   },
   ember: {
     bodyClass: "theme-ember",
     accent: 0xffb06a,
-    label: "Ember Forge"
+    label: "Янтарная орбита"
   }
 };
 
@@ -48,7 +48,7 @@ function applyTheme(themeKey) {
   document.body.classList.add(themeMap[themeKey].bodyClass);
   const planetStatus = document.querySelector("#planet-status");
   if (planetStatus) {
-    planetStatus.textContent = `Текущая система: ${themeMap[themeKey].label}`;
+    planetStatus.textContent = `Активный мир: ${themeMap[themeKey].label}`;
   }
   document.dispatchEvent(
     new CustomEvent("system-theme-change", {
@@ -89,22 +89,15 @@ const gltfLoader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 
 const urls = {
-  rocket:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/models/gltf/PrimaryIonDrive.glb",
-  earthAlbedo:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_atmos_2048.jpg",
-  earthNormal:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_normal_2048.jpg",
-  earthSpecular:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_specular_2048.jpg",
-  earthClouds:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/earth_clouds_1024.png",
-  marsAlbedo:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/mars_1k_color.jpg",
-  marsNormal:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/mars_1k_normal.jpg",
-  moonAlbedo:
-    "https://cdn.jsdelivr.net/gh/mrdoob/three.js@dev/examples/textures/planets/moon_1024.jpg"
+  rocket: "./assets/PrimaryIonDrive.glb",
+  earthAlbedo: "./assets/textures/earth_atmos_2048.jpg",
+  earthNormal: "./assets/textures/earth_normal_2048.jpg",
+  earthSpecular: "./assets/textures/earth_specular_2048.jpg",
+  earthClouds: "./assets/textures/earth_clouds_1024.png",
+  moonAlbedo: "./assets/textures/moon_1024.jpg",
+  neptuneAlbedo: "./assets/textures/2k_neptune.jpg",
+  saturnAlbedo: "./assets/textures/2k_saturn.jpg",
+  jupiterAlbedo: "./assets/textures/2k_jupiter.jpg"
 };
 
 const loadMessages = [
@@ -190,9 +183,10 @@ const assets = {
     earthNormal: null,
     earthSpecular: null,
     earthClouds: null,
-    marsAlbedo: null,
-    marsNormal: null,
-    moonAlbedo: null
+    moonAlbedo: null,
+    neptuneAlbedo: null,
+    saturnAlbedo: null,
+    jupiterAlbedo: null
   }
 };
 
@@ -211,14 +205,17 @@ const earthSpecularPromise = trackPromise(loadTexture(urls.earthSpecular)).then(
 const earthCloudsPromise = trackPromise(loadTexture(urls.earthClouds)).then((texture) => {
   assets.textures.earthClouds = texture;
 });
-const marsAlbedoPromise = trackPromise(loadTexture(urls.marsAlbedo)).then((texture) => {
-  assets.textures.marsAlbedo = texture;
-});
-const marsNormalPromise = trackPromise(loadTexture(urls.marsNormal)).then((texture) => {
-  assets.textures.marsNormal = texture;
-});
 const moonAlbedoPromise = trackPromise(loadTexture(urls.moonAlbedo)).then((texture) => {
   assets.textures.moonAlbedo = texture;
+});
+const neptuneAlbedoPromise = trackPromise(loadTexture(urls.neptuneAlbedo)).then((texture) => {
+  assets.textures.neptuneAlbedo = texture;
+});
+const saturnAlbedoPromise = trackPromise(loadTexture(urls.saturnAlbedo)).then((texture) => {
+  assets.textures.saturnAlbedo = texture;
+});
+const jupiterAlbedoPromise = trackPromise(loadTexture(urls.jupiterAlbedo)).then((texture) => {
+  assets.textures.jupiterAlbedo = texture;
 });
 
 document.querySelectorAll(".video-ribbon video").forEach((video) => {
@@ -627,12 +624,11 @@ function initEarthScene() {
 
   const planetSystems = [
     { key: "earth", baseAngle: 0, anchor: earthGroup, mesh: earthMesh },
-    { key: "neon", baseAngle: 2.12, anchor: null, mesh: null },
+    { key: "neon", baseAngle: 2.36, anchor: null, mesh: null },
     { key: "ember", baseAngle: -2.18, anchor: null, mesh: null }
   ];
   const remotePlanetMeshes = [];
   const remotePlanetHitAreas = [];
-  const themeHitAreas = [earthHitArea];
   const remoteFrontnessByTheme = new Map([
     ["earth", 1],
     ["neon", 0],
@@ -642,26 +638,33 @@ function initEarthScene() {
   const remoteDefs = [
     {
       key: "neon",
-      color: 0x7fd9ff,
-      glow: 0x7af4ff,
-      radius: 1.14,
-      baseY: 0.5,
-      mapKey: "marsAlbedo",
-      normalKey: "marsNormal",
-      roughness: 0.54,
+      color: 0xd6efff,
+      glow: 0x8df7ff,
+      radius: 0.78,
+      baseY: 0.86,
+      mapKey: "neptuneAlbedo",
+      normalKey: null,
+      roughness: 0.5,
       metalness: 0.09,
-      orbitSpeed: 0.23
+      orbitSpeed: 0.13,
+      orbitRadius: 13.4,
+      zBias: -7.1,
+      focusX: 2.56
     },
     {
       key: "ember",
-      color: 0xffb775,
+      color: 0xffe5c8,
       glow: 0xffc47a,
-      radius: 1.08,
-      baseY: 0.44,
-      mapKey: "moonAlbedo",
-      roughness: 0.6,
+      radius: 0.74,
+      baseY: 0.52,
+      mapKey: "saturnAlbedo",
+      normalKey: null,
+      roughness: 0.56,
       metalness: 0.08,
-      orbitSpeed: -0.17
+      orbitSpeed: -0.11,
+      orbitRadius: 12.6,
+      zBias: -7.5,
+      focusX: -2.5
     }
   ];
 
@@ -681,12 +684,12 @@ function initEarthScene() {
     const bodyMaterial = new THREE.MeshPhysicalMaterial({
       color: def.color,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.16,
       roughness: def.roughness ?? 0.56,
       metalness: def.metalness ?? 0.08,
-      clearcoat: 0.46,
-      clearcoatRoughness: 0.35,
-      emissive: new THREE.Color(def.glow).multiplyScalar(0.2),
+      clearcoat: 0.52,
+      clearcoatRoughness: 0.31,
+      emissive: new THREE.Color(def.glow).multiplyScalar(0.11),
       map: fallbackMap
     });
     if (def.mapKey && assets.textures[def.mapKey]) {
@@ -703,9 +706,9 @@ function initEarthScene() {
       bodyMaterial
     );
     anchor.position.set(
-      Math.sin(slot.baseAngle) * remoteOrbitRadius,
+      Math.sin(slot.baseAngle) * (def.orbitRadius || remoteOrbitRadius),
       def.baseY,
-      Math.cos(slot.baseAngle) * remoteOrbitRadius - 2.5
+      Math.cos(slot.baseAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
     );
     const halo = new THREE.Mesh(
       new THREE.TorusGeometry(def.radius * 1.18, 0.04, 18, 92),
@@ -720,7 +723,7 @@ function initEarthScene() {
     anchor.add(halo);
 
     const hitArea = new THREE.Mesh(
-      new THREE.SphereGeometry(def.radius * 2.2, 20, 20),
+      new THREE.SphereGeometry(def.radius * 1.58, 20, 20),
       new THREE.MeshBasicMaterial({
         transparent: true,
         opacity: 0.01,
@@ -734,7 +737,6 @@ function initEarthScene() {
     body.userData.themeKey = def.key;
     remotePlanetMeshes.push(body);
     remotePlanetHitAreas.push(hitArea);
-    themeHitAreas.push(hitArea);
 
     slot.anchor = anchor;
     slot.mesh = body;
@@ -756,7 +758,7 @@ function initEarthScene() {
     new THREE.MeshBasicMaterial({
       color: 0x5b9aff,
       transparent: true,
-      opacity: 0.18
+      opacity: 0.08
     })
   );
   orbitGuide.rotation.x = Math.PI * 0.5;
@@ -796,15 +798,16 @@ function initEarthScene() {
   const moonGroup = new THREE.Group();
   worldRig.add(moonGroup);
   const moonDefs = [
-    { radius: 4.55, size: 0.11, speed: 0.2, phase: 0.35, tone: 0.58, y: 0.2 },
-    { radius: 5.18, size: 0.08, speed: 0.14, phase: 2.4, tone: 0.5, y: -0.22 }
+    { radius: 4.55, size: 0.11, speed: 0.2, phase: 0.35, tone: 0.58, y: 0.2, mapKey: "moonAlbedo" },
+    { radius: 5.18, size: 0.08, speed: 0.14, phase: 2.4, tone: 0.5, y: -0.22, mapKey: "jupiterAlbedo" }
   ];
   moonDefs.forEach((def, index) => {
+    const moonMap = def.mapKey ? assets.textures[def.mapKey] || null : null;
     const moonMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color().setHSL(0.58, 0.16, def.tone),
       roughness: 0.78,
       metalness: 0.04,
-      map: assets.textures.moonAlbedo || null
+      map: moonMap
     });
     if (moonMat.map) {
       moonMat.map.colorSpace = THREE.SRGBColorSpace;
@@ -862,6 +865,8 @@ function initEarthScene() {
   let pointerStartX = 0;
   let pointerStartY = 0;
   let pointerMaybeClick = false;
+  let pointerDownTheme = null;
+  let draggingRemoteTheme = null;
   let lastX = 0;
   let lastY = 0;
   let worldRotationY = 0;
@@ -916,7 +921,8 @@ function initEarthScene() {
     pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
     pointerNdc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointerNdc, camera);
-    const intersections = raycaster.intersectObjects(themeHitAreas, false);
+    const candidates = [earthHitArea, ...remotePlanetHitAreas, ...remotePlanetMeshes];
+    const intersections = raycaster.intersectObjects(candidates, false);
     for (const entry of intersections) {
       const themeKey = entry?.object?.userData?.themeKey;
       if (!themeKey) {
@@ -926,23 +932,17 @@ function initEarthScene() {
         return "earth";
       }
       const frontness = remoteFrontnessByTheme.get(themeKey) ?? 0;
-      if (frontness > 0.03) {
+      if (frontness > 0.08 || activeTheme === themeKey) {
         return themeKey;
       }
     }
-    const bodyIntersections = raycaster.intersectObjects(remotePlanetMeshes, false);
-    const bodyHit = bodyIntersections.find((entry) => {
-      const mesh = entry.object;
-      const themeKey = mesh?.userData?.themeKey;
-      if (!themeKey) {
-        return false;
-      }
-      return (remoteFrontnessByTheme.get(themeKey) ?? 0) > 0.03;
-    });
-    return bodyHit?.object?.userData?.themeKey || null;
+    return null;
   };
 
   earthCanvas.addEventListener("pointerdown", (event) => {
+    const pickedTheme = pickRemoteTheme(event.clientX, event.clientY);
+    pointerDownTheme = pickedTheme;
+    draggingRemoteTheme = pickedTheme && pickedTheme !== "earth" ? pickedTheme : null;
     pointerStartX = event.clientX;
     pointerStartY = event.clientY;
     pointerMaybeClick = true;
@@ -966,10 +966,18 @@ function initEarthScene() {
     }
     const dx = event.clientX - lastX;
     const dy = event.clientY - lastY;
-    worldRotationY += dx * 0.0045;
-    worldTiltX = THREE.MathUtils.clamp(worldTiltX + dy * 0.0016, -0.2, 0.18);
-    spinVelocity = dx * 0.0006;
-    tiltVelocity = dy * 0.00008;
+    if (draggingRemoteTheme) {
+      const slot = planetSystems.find((item) => item.key === draggingRemoteTheme);
+      if (slot) {
+        slot.orbitAngle = (slot.orbitAngle ?? slot.baseAngle) + dx * 0.0048;
+        slot.baseY = THREE.MathUtils.clamp(slot.baseY + dy * -0.0034, -0.05, 1.08);
+      }
+    } else {
+      worldRotationY += dx * 0.0045;
+      worldTiltX = THREE.MathUtils.clamp(worldTiltX + dy * 0.0016, -0.2, 0.18);
+      spinVelocity = dx * 0.0006;
+      tiltVelocity = dy * 0.00008;
+    }
     dragDistance += Math.abs(dx) + Math.abs(dy);
     if (Math.abs(event.clientX - pointerStartX) + Math.abs(event.clientY - pointerStartY) > 8) {
       pointerMaybeClick = false;
@@ -987,13 +995,17 @@ function initEarthScene() {
       Math.abs((event?.clientX ?? pointerStartX) - pointerStartX) +
       Math.abs((event?.clientY ?? pointerStartY) - pointerStartY);
     if (!cancelled && pointerMaybeClick && movedSinceDown < 8) {
-      const pickedTheme = pickRemoteTheme(event?.clientX ?? pointerStartX, event?.clientY ?? pointerStartY);
+      const pickedTheme =
+        pointerDownTheme ||
+        pickRemoteTheme(event?.clientX ?? pointerStartX, event?.clientY ?? pointerStartY);
       if (pickedTheme) {
         commitTheme(pickedTheme);
         revealEnergy = Math.max(revealEnergy, 0.56);
       }
     }
     pointerMaybeClick = false;
+    pointerDownTheme = null;
+    draggingRemoteTheme = null;
     if (!dragActive) {
       return;
     }
@@ -1070,11 +1082,11 @@ function initEarthScene() {
     earthMesh.rotation.y += prefersReducedMotion ? 0.00024 : 0.001;
     cloudMesh.rotation.y += 0.0012;
     earthGroup.rotation.z = Math.sin(t * 0.18) * 0.03;
-    const earthTargetScale = activeTheme === "earth" ? 1 : 0.79;
+    const earthTargetScale = activeTheme === "earth" ? 1 : 0.88;
     const earthTargetPos =
       activeTheme === "earth"
         ? tmpTarget.set(0, 0, 0)
-        : tmpTarget.set(-5.35, -0.28, -4.05);
+        : tmpTarget.set(-2.15, -0.08, -2.62);
     earthGroup.position.lerp(earthTargetPos, activeTheme === "earth" ? 0.06 : 0.08);
     earthGroup.scale.lerp(new THREE.Vector3(earthTargetScale, earthTargetScale, earthTargetScale), 0.08);
 
@@ -1125,19 +1137,19 @@ function initEarthScene() {
       const orbitAngle = slot.orbitAngle ?? slot.baseAngle;
       slot.mesh.rotation.y += 0.003 + index * 0.001;
       const orbitPos = new THREE.Vector3(
-        Math.sin(orbitAngle) * remoteOrbitRadius,
+        Math.sin(orbitAngle) * (def.orbitRadius || remoteOrbitRadius),
         def.baseY + Math.sin(orbitClock * 0.7 + index * 1.5) * 0.2,
-        Math.cos(orbitAngle) * remoteOrbitRadius - 2.5
+        Math.cos(orbitAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
       );
       const focusPos = new THREE.Vector3(
-        0.05 + Math.sin(t * 0.34 + index) * 0.12,
-        0.18 + Math.cos(t * 0.46 + index) * 0.09,
-        0.28
+        (def.focusX || 0) + Math.sin(t * 0.34 + index) * 0.1,
+        0.42 + Math.cos(t * 0.46 + index) * 0.08,
+        -2.84
       );
       const sidePos = new THREE.Vector3(
-        Math.sign(Math.sin(slot.baseAngle)) * 6.35,
-        0.94 + Math.sin(t * 0.3 + index * 2) * 0.12,
-        -5.4
+        Math.sign(Math.sin(slot.baseAngle)) * 6.4,
+        1.02 + Math.sin(t * 0.3 + index * 2) * 0.11,
+        -7.4
       );
       const targetPos =
         activeTheme === "earth"
@@ -1153,27 +1165,27 @@ function initEarthScene() {
       remoteFrontnessByTheme.set(def.key, frontness);
       const focusBoost = activeTheme === def.key ? 0.34 : 0;
       const opacity = THREE.MathUtils.clamp(
-        0.16 + frontness * (0.26 + revealEnergy * 0.62) + focusBoost,
-        0.16,
-        0.98
+        0.36 + frontness * (0.18 + revealEnergy * 0.3) + focusBoost * 0.38,
+        0.36,
+        1
       );
       slot.mesh.material.opacity = opacity;
-      slot.mesh.material.emissiveIntensity = 0.28 + frontness * 0.44 + focusBoost * 0.5;
+      slot.mesh.material.emissiveIntensity = 0.1 + frontness * 0.22 + focusBoost * 0.26;
       const targetScale =
         activeTheme === def.key
-          ? 1.36
+          ? 0.76
           : activeTheme === "earth"
-            ? 0.72 + frontness * 0.22
-            : 0.66 + frontness * 0.14;
+            ? 0.48 + frontness * 0.16
+            : 0.44 + frontness * 0.1;
       const currentScale = slot.mesh.scale.x;
       const nextScale = THREE.MathUtils.lerp(currentScale, targetScale, activeTheme === "earth" ? 0.05 : 0.08);
       slot.mesh.scale.setScalar(nextScale);
       if (slot.halo) {
-        slot.halo.material.opacity = 0.1 + opacity * (activeTheme === def.key ? 0.62 : 0.42);
+        slot.halo.material.opacity = 0.06 + opacity * (activeTheme === def.key ? 0.34 : 0.22);
         slot.halo.rotation.z += 0.007 + index * 0.002;
       }
       if (slot.hitArea) {
-        slot.hitArea.scale.setScalar(1 + frontness * 0.45 + (activeTheme === def.key ? 0.5 : 0));
+        slot.hitArea.scale.setScalar(1 + frontness * 0.2 + (activeTheme === def.key ? 0.18 : 0));
       }
     });
 
@@ -1187,13 +1199,13 @@ function initEarthScene() {
       flightBoost = 0;
     }
 
-    const targetCameraZ = activeTheme === "earth" ? 7.1 : 5.04;
-    const targetCameraX = activeTheme === "earth" ? 0 : 0.11;
-    const targetCameraY = activeTheme === "earth" ? 0.08 : 0.23;
+    const targetCameraZ = activeTheme === "earth" ? 7.1 : 6.45;
+    const targetCameraX = activeTheme === "earth" ? 0 : 0.03;
+    const targetCameraY = activeTheme === "earth" ? 0.08 : 0.14;
     camera.position.x += (targetCameraX - camera.position.x) * 0.09;
     camera.position.y += (targetCameraY - camera.position.y) * 0.09;
-    camera.position.z += (targetCameraZ - flightBoost * 2.2 - camera.position.z) * 0.1;
-    camera.fov += ((activeTheme === "earth" ? 43 : 37.5) + flightBoost * 11 - camera.fov) * 0.12;
+    camera.position.z += (targetCameraZ - flightBoost * 1.05 - camera.position.z) * 0.1;
+    camera.fov += ((activeTheme === "earth" ? 43 : 41.2) + flightBoost * 5.4 - camera.fov) * 0.12;
     camera.updateProjectionMatrix();
     if (activeTheme === "earth") {
       cameraLookTarget.set(0, 0, 0);
@@ -1539,78 +1551,35 @@ function initOrbitPhysics() {
 function initCodeTyping() {
   const codeSection = document.querySelector("#code");
   const liveCodeNode = document.querySelector("#live-code");
-  const runtimeHeadlineNode = document.querySelector("#runtime-headline");
-  const runtimeListNode = document.querySelector("#runtime-list");
-  const runtimeControlNodes = [...document.querySelectorAll(".runtime-chip")];
   const codePulseNodes = [...document.querySelectorAll("#code-pulses span")];
-  if (!liveCodeNode || !runtimeListNode || !codeSection) {
+  if (!liveCodeNode || !codeSection) {
     return;
   }
-  liveCodeNode.textContent = "const mission = craftUI({ wow: true, trust: true });";
+  liveCodeNode.textContent = "const mission = buildProduct({ value: true, trust: true });";
 
   const snippets = [
     {
-      title: "Frontend пакет обновлён",
-      track: "frontend",
       code: [
-        "$ git pull mentor/ui-polish",
-        "$ pnpm build:ui --profile=trust",
-        "$ deploy --scope=frontend --status=ok"
+        "$ strategy map --goal=grant-platform",
+        "$ define roles --experts --authors --participants",
+        "$ launch sprint --team=core --status=green"
       ]
     },
     {
-      title: "Backend контур стабилен",
-      track: "backend",
       code: [
-        "$ pnpm test:api --critical",
-        "$ run migration --safe-mode",
-        "$ monitor latency --threshold=80ms"
+        "$ architect stack --framework=fit-to-task",
+        "$ run mentor-review --scope=critical-flow",
+        "$ release product --quality=production-ready"
       ]
     },
     {
-      title: "Клиентская итерация закрыта",
-      track: "client",
       code: [
-        "$ sync feedback --client",
-        "$ map goals --mentor --client",
-        "$ release impact-report"
+        "$ automate ops --reports --content --delivery",
+        "$ sync marketing --tg --dzen --youtube",
+        "$ measure impact --business --team --users"
       ]
     }
   ];
-
-  let activeTrack = "all";
-  const applyRuntimeFilter = () => {
-    const rows = [...runtimeListNode.querySelectorAll("li")];
-    rows.forEach((row) => {
-      const rowTrack = row.dataset.track || "all";
-      row.hidden = activeTrack !== "all" && rowTrack !== activeTrack;
-    });
-  };
-
-  runtimeControlNodes.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      activeTrack = chip.dataset.track || "all";
-      runtimeControlNodes.forEach((node) => {
-        node.classList.toggle("is-active", node === chip);
-      });
-      applyRuntimeFilter();
-      chip.classList.remove("is-active");
-      void chip.offsetWidth;
-      chip.classList.add("is-active");
-    });
-  });
-
-  const pushRuntime = (snippet) => {
-    const row = document.createElement("li");
-    row.dataset.track = snippet.track;
-    row.textContent = `${snippet.title} • ${new Date().toLocaleTimeString("ru-RU")}`;
-    runtimeListNode.prepend(row);
-    requestAnimationFrame(() => row.classList.add("is-visible"));
-    while (runtimeListNode.children.length > 5) {
-      runtimeListNode.removeChild(runtimeListNode.lastElementChild);
-    }
-    applyRuntimeFilter();
-  };
 
   let snippetIndex = 0;
   let charIndex = 0;
@@ -1628,10 +1597,6 @@ function initCodeTyping() {
         codePulseNodes.forEach((node, index) => {
           node.style.animationDelay = `${index * 0.08}s`;
         });
-        if (runtimeHeadlineNode) {
-          runtimeHeadlineNode.textContent = snippet.title;
-        }
-        pushRuntime(snippet);
       }
       setTimeout(tick, 18);
       return;
@@ -1678,6 +1643,83 @@ function initCodeTyping() {
   } else {
     startTyping();
   }
+}
+
+function initProjectShowcase() {
+  const titleNode = document.querySelector("#project-focus-title");
+  const summaryNode = document.querySelector("#project-focus-summary");
+  const pointsNode = document.querySelector("#project-focus-points");
+  const impactNode = document.querySelector("#project-focus-impact");
+  const chipNodes = [...document.querySelectorAll(".project-chip")];
+  if (!titleNode || !summaryNode || !pointsNode || !impactNode || chipNodes.length === 0) {
+    return;
+  }
+
+  const projects = {
+    grantflow: {
+      title: "GrantFlow — грантовый проект для молодёжных инициатив",
+      summary:
+        "Платформа в формате ленты, где школьники, студенты и молодые энтузиасты публикуют идеи, находят команду, получают менторскую обратную связь и выходят к реальной реализации.",
+      points: [
+        "Собрана ролевая модель: эксперты, авторы проектов, участники команд.",
+        "Снижен порог входа в проектную среду: всё в одном понятном пространстве.",
+        "Поддержка не только IT-направления: инженерные, социальные и образовательные проекты."
+      ],
+      impact:
+        "Польза: молодые команды быстрее переходят от идеи к рабочему проекту и получают реальный шанс на развитие через грантовую экосистему."
+    },
+    mentorops: {
+      title: "MentorOps — система управления менторским контуром",
+      summary:
+        "Операционный сервис для синхронизации менторов, ассистентов и команды разработки: задачи, стандарты, ревью, контроль качества и прозрачный delivery.",
+      points: [
+        "Выстроены роли, регламенты и единый цикл работы.",
+        "Автоматизированы рутины по отчётности и сопровождению команды.",
+        "Стабилизирован ритм релизов и управляемость сложных задач."
+      ],
+      impact:
+        "Польза: команда работает предсказуемо, руководитель видит картину целиком, а качество растёт без хаоса."
+    },
+    media: {
+      title: "Media Growth Lab — контент и маркетинг вокруг продукта",
+      summary:
+        "Интеграция каналов Telegram, Дзен и YouTube в единую воронку внимания с опорой на аналитику, эксперименты и автоматизацию процессов.",
+      points: [
+        "Разработаны контент-сценарии для разных стадий воронки.",
+        "Связаны маркетинг, продукт и команда в один цикл гипотез.",
+        "Настроен контроль эффективности по метрикам, а не по ощущениям."
+      ],
+      impact:
+        "Польза: продукт получает устойчивый охват, доверие аудитории и системный рост, а не разовые всплески."
+    }
+  };
+
+  const setProject = (key) => {
+    const data = projects[key];
+    if (!data) {
+      return;
+    }
+    chipNodes.forEach((chip) => {
+      chip.classList.toggle("is-active", chip.dataset.project === key);
+    });
+    titleNode.textContent = data.title;
+    summaryNode.textContent = data.summary;
+    pointsNode.innerHTML = "";
+    data.points.forEach((point) => {
+      const li = document.createElement("li");
+      li.textContent = point;
+      pointsNode.appendChild(li);
+    });
+    impactNode.textContent = data.impact;
+  };
+
+  chipNodes.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      setProject(chip.dataset.project || "grantflow");
+    });
+  });
+
+  setProject("grantflow");
 }
 
 function initTerminalStream() {
@@ -1844,6 +1886,7 @@ initPointerGlow();
 initMagneticButtons();
 initTerminalStream();
 initCodeTyping();
+initProjectShowcase();
 initTypeOnView();
 initRouteProgress();
 initOrbitPhysics();
