@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>artkozk — cosmic dev journey</title>
+    <title>Артемий Кожакин — Digital/IT Lead</title>
     <meta
       name="description"
-      content="Иммерсивный сайт-визитка Артемия Кожакина: 3D модели, интерактивная космическая сцена, менторы и клиентские результаты."
+      content="Иммерсивный сайт-визитка Артемия Кожакина: управление digital и IT-проектами, продуктовый подход, менторский контур и сильный delivery."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,32 +20,27 @@
         background: #020613;
       }
       body.show-preloader .site-header,
-      body.show-preloader .journey,
+      body.show-preloader .main,
       body.show-preloader .footer {
         opacity: 0;
         visibility: hidden;
       }
       body.show-preloader #preloader {
-        position: fixed;
-        inset: 0;
-        z-index: 999;
         opacity: 1;
         visibility: visible;
       }
     </style>
-    <link rel="stylesheet" href="./styles.css?v=20260418-fix24" />
+    <link rel="stylesheet" href="./styles.css?v=20260418-fix26" />
   </head>
-  <body class="theme-earth show-preloader js-ready">
-    <div id="preloader" class="preloader">
+  <body class="theme-earth show-preloader">
+    <div id="preloader" class="preloader" role="status" aria-live="polite">
       <canvas id="preloader-canvas"></canvas>
       <div class="preloader__veil"></div>
-      <div class="preloader__shell">
-        <p class="preloader__kicker">Immersive Portfolio</p>
-        <p class="preloader__title">artkozk</p>
-        <p id="preloader-status">Запуск межзвёздной экспедиции...</p>
-        <div class="preloader__meter">
-          <span id="preloader-meter-fill"></span>
-        </div>
+      <div class="preloader__card">
+        <p class="preloader__eyebrow">artkozk launch sequence</p>
+        <p class="preloader__title">Переход в рабочую орбиту</p>
+        <p id="preloader-status" class="preloader__status">Загрузка космической сцены...</p>
+        <div class="preloader__meter"><span id="preloader-meter-fill"></span></div>
       </div>
     </div>
 
@@ -58,388 +53,217 @@
     </div>
 
     <header class="site-header">
-      <div class="container nav-wrap">
-        <a class="brand" href="#home">
+      <div class="container header__row">
+        <a href="#home" class="brand">
           <span class="brand__mono">AK</span>
           <span class="brand__name">artkozk / Artemy Kozhakin</span>
         </a>
         <nav class="nav">
           <a href="#mentors">Менторы</a>
-          <a href="#code">Код</a>
-          <a href="#clients">Клиенты</a>
-          <a href="#evidence">Доказательства</a>
-          <a href="#planet-lab">Планетарий</a>
+          <a href="#projects">Проекты</a>
+          <a href="#proof">Экспертиза</a>
+          <a href="#planet">Планеты</a>
           <a href="#contacts">Контакт</a>
         </nav>
       </div>
     </header>
-    <nav class="mobile-dock" aria-label="Быстрая навигация">
-      <a href="#home">Старт</a>
-      <a href="#mentors">Менторы</a>
-      <a href="#code">Код</a>
-      <a href="#planet-lab">Планеты</a>
-      <a href="#contacts">Контакт</a>
-    </nav>
 
-    <main id="home" class="journey container">
-      <section class="scene scene--hero reveal">
-        <article class="hero-intro panel fx-aurora fx-pulse">
+    <main id="home" class="main container">
+      <section class="grid grid--hero reveal">
+        <article class="panel panel--hero">
           <p class="eyebrow">Портфолио полного цикла</p>
-          <h1>
-            Артемий Кожакин
-            <span>руковожу digital и IT‑проектами: от идеи и архитектуры до релиза и масштабирования</span>
+          <h1 data-type-text="Артемий Кожакин — руководитель digital и IT‑проектов">
+            Артемий Кожакин — руководитель digital и IT‑проектов
           </h1>
           <p>
-            Работаю с менторами и клиентами в едином контуре: глубоко понимаю устройство продукта
-            изнутри, выстраиваю процесс команды и довожу инициативы до измеримого результата, включая
-            грантовые и социально-значимые проекты.
+            Беру ответственность за путь от идеи до релиза: продуктовая логика, архитектура,
+            управление командой, контроль качества и бизнес-результат.
           </p>
-          <div class="hero-actions">
-            <a class="btn btn--solid magnetic" href="#contacts">Запустить проект</a>
-            <a class="btn btn--ghost magnetic" href="#clients">Посмотреть кейсы</a>
+          <p>
+            Работаю в плотной связке с менторами и клиентами, понимаю устройство продукта изнутри и
+            несу delivery как систему, а не как набор случайных задач.
+          </p>
+          <div class="actions">
+            <a class="btn btn--solid" href="#contacts">Обсудить проект</a>
+            <a class="btn btn--ghost" href="#projects">Смотреть кейсы</a>
           </div>
         </article>
 
-        <article class="hero-telemetry panel fx-prism reveal" data-delay="80">
-          <p class="eyebrow">Ключевые акценты</p>
-          <div class="telemetry-grid">
-            <div><span>Роль</span><b>Team Lead / PM / Product</b></div>
-            <div><span>Подход</span><b>Mentor-driven delivery</b></div>
-            <div><span>Фокус</span><b>Ценность для бизнеса</b></div>
-            <div><span>Сильная сторона</span><b>Системная архитектура</b></div>
+        <article class="panel panel--telemetry">
+          <p class="eyebrow">Ключевая ценность</p>
+          <div class="telemetry">
+            <div>
+              <span>Роль</span>
+              <b>Team Lead / PM / Product</b>
+            </div>
+            <div>
+              <span>Подход</span>
+              <b>Mentor-driven delivery</b>
+            </div>
+            <div>
+              <span>Сильная сторона</span>
+              <b>Системные решения под рост</b>
+            </div>
+            <div>
+              <span>Фокус</span>
+              <b>Ценность для бизнеса и команды</b>
+            </div>
           </div>
         </article>
       </section>
 
-      <section id="mentors" class="scene scene--mentors reveal">
-        <article class="mentor-orbit panel fx-ember fx-grid">
-          <p class="eyebrow">Созвездие Наставников</p>
-          <h2>С менторами усиливаю ключевое: архитектуру, продукт, стабильность и качество релиза</h2>
-          <p class="mentor-lead">
-            Смысл блока: видно, как менторский контур снижает риск релиза. На каждом фокусе я закрываю
-            отдельный класс ошибок — архитектуру, интерфейс, стабильность сервиса и продуктовую логику.
+      <section id="mentors" class="grid grid--mentors reveal">
+        <article class="panel panel--orbit">
+          <p class="eyebrow">Созвездие наставников</p>
+          <h2>С менторским контуром закрываю ключевые риски релиза</h2>
+          <p class="lead">
+            Каждый узел показывает отдельную зону ответственности, которая напрямую влияет на
+            устойчивость продукта и качество бизнес-результата.
           </p>
           <div id="orbit-field" class="orbit-field">
             <button
               class="orbit-node is-active"
               data-key="Архитектура"
-              data-title="Архитектурный менторинг"
-              data-copy="Прорабатываю системный дизайн, доменные границы и масштабируемость, чтобы проект держал рост."
+              data-title="Архитектура"
+              data-copy="Проект становится масштабируемым: меньше переделок на росте и меньше критичных узких мест."
             >
               Архитектура
             </button>
             <button
               class="orbit-node"
               data-key="Фронтенд"
-              data-title="Frontend ревью"
-              data-copy="Довожу интерфейсы до коммерческого уровня: скорость, чистая композиция и сильный пользовательский опыт."
+              data-title="Фронтенд"
+              data-copy="Интерфейс работает быстрее и чище: меньше потерь пользователей и выше доверие к продукту."
             >
               Фронтенд
             </button>
             <button
               class="orbit-node"
               data-key="Бэкенд"
-              data-title="Backend практика"
-              data-copy="Укрепляю API и интеграции: отказоустойчивость, безопасность, логирование и прогнозируемая работа под нагрузкой."
+              data-title="Бэкенд"
+              data-copy="Сервис стабилен под нагрузкой: меньше падений, предсказуемая работа API и интеграций."
             >
               Бэкенд
             </button>
             <button
               class="orbit-node"
               data-key="Продукт"
-              data-title="Product thinking"
-              data-copy="Смотрю на задачу как на продукт: цель, пользователь, экономика решения и путь к реальному внедрению."
+              data-title="Продукт"
+              data-copy="Каждая задача связана с целью бизнеса: команда делает важное, а не просто «много»."
             >
               Продукт
             </button>
           </div>
+          <div class="mentor-focus">
+            <p id="mentor-focus-title" class="mentor-focus__title">Фокус: Архитектура</p>
+            <p id="mentor-focus-copy" class="mentor-focus__copy">
+              Проект становится масштабируемым: меньше переделок на росте и меньше критичных узких мест.
+            </p>
+          </div>
         </article>
 
-        <article class="project-showcase panel fx-prism" id="project-showcase">
+        <article id="projects" class="panel panel--projects">
           <p class="eyebrow">Портфолио проектов</p>
           <h3 id="project-focus-title">Разработал площадку для молодёжных проектов при грантовой поддержке</h3>
           <p id="project-focus-summary">
-            Ценность проекта — не «ещё одна лента», а быстрый вход в проектную среду: от идеи к команде,
-            наставнику и реальной реализации без месячной бюрократии и хаоса.
+            Ценность: молодой автор быстрее проходит путь от идеи до команды и рабочего проекта, а
+            не остаётся один с замыслом.
           </p>
           <div class="project-switch">
             <button class="project-chip is-active" data-project="grantflow">GrantFlow</button>
             <button class="project-chip" data-project="mentorops">MentorOps</button>
             <button class="project-chip" data-project="media">Media Growth</button>
           </div>
-          <ul id="project-focus-points" class="project-focus-points"></ul>
-          <p id="project-focus-impact" class="project-focus-impact"></p>
+          <ul id="project-focus-points" class="project-points"></ul>
+          <p id="project-focus-impact" class="project-impact"></p>
         </article>
       </section>
 
-      <section id="code" class="scene scene--code reveal">
-        <article class="code-lab panel fx-code">
-          <p class="eyebrow">Инженерный поток</p>
-          <h2>Код оживает в потоке команд и инженерных решений</h2>
-          <div class="code-stage">
-            <pre id="live-code" class="live-code"></pre>
-            <div id="code-pulses" class="code-pulses">
-              <span>АРХИТЕКТУРА</span>
-              <span>РЕАЛИЗАЦИЯ</span>
-              <span>РЕЛИЗ</span>
-              <span>РЕВЬЮ С МЕНТОРОМ</span>
-            </div>
+      <section id="proof" class="grid grid--proof reveal">
+        <article class="panel panel--code">
+          <p class="eyebrow">Инженерный контур</p>
+          <h2>Код и delivery работают как единая система</h2>
+          <pre id="live-code" class="live-code"></pre>
+          <div class="code-tags">
+            <span>Архитектура</span>
+            <span>Ревью</span>
+            <span>Релиз</span>
+            <span>Контроль качества</span>
           </div>
         </article>
 
-        <article class="delivery-systems panel fx-neon">
-          <p class="eyebrow">Контур реализации</p>
-          <h3>Как я веду проект от гипотезы к рабочему продукту</h3>
-          <ul class="framework-list">
-            <li><b>Discovery:</b> фиксирую цель, ограничения и критерии результата.</li>
-            <li><b>Architecture:</b> выбираю стек осознанно: плюсы, минусы, риски роста.</li>
-            <li><b>Delivery:</b> управляю командой, ревью, качеством и ритмом релизов.</li>
-            <li><b>Scale:</b> подключаю автоматизацию, AI-инструменты и маркетинговый контур.</li>
+        <article class="panel panel--prooflist">
+          <p class="eyebrow">Что получает клиент</p>
+          <ul class="proof-list">
+            <li><b>Предсказуемость:</b> чёткий ритм задач, прозрачные статусы и контроль сроков.</li>
+            <li><b>Надёжность:</b> решения проверяются на рост, нагрузку и эксплуатацию.</li>
+            <li><b>Скорость:</b> автоматизация рутины и AI-инструменты там, где это усиливает результат.</li>
+            <li><b>Рост:</b> после релиза проект получает контентный и маркетинговый контур, а не «тишину».</li>
           </ul>
         </article>
       </section>
 
-      <section id="clients" class="scene scene--clients reveal">
-        <article class="clients-banner panel fx-ember">
-          <p class="eyebrow">Польза для клиента</p>
-          <h2 data-type-text="С клиентами говорю языком результата: сроков, качества и развития продукта">
-            С клиентами говорю языком результата: сроков, качества и развития продукта
-          </h2>
-          <p>
-            Вместо “сделайте красиво” выстраиваю полноценную систему: продуктовая логика,
-            инженерная надёжность и прозрачный delivery для команды и бизнеса.
-          </p>
-          <div class="marquee">
-            <span>
-              лидерство • продуктовый подход • автоматизация процессов • управление командой •
-              маркетинг и контент • инженерная дисциплина • mentor-driven delivery •
-              лидерство • продуктовый подход • автоматизация процессов • управление командой •
-            </span>
-          </div>
+      <section class="grid grid--cases reveal">
+        <article class="panel case-card">
+          <p class="eyebrow">Case 01</p>
+          <h3>GrantFlow</h3>
+          <p>Разработал площадку для молодежных проектов при грантовой поддержке.</p>
+          <p class="case-result">Результат: больше инициатив доходят до реализации, а не остаются на уровне идеи.</p>
         </article>
 
-        <article class="impact-cluster panel fx-neon">
-          <div class="impact-card"><h3>Discovery</h3><p>Бриф, аудит и формализация цели проекта.</p></div>
-          <div class="impact-card"><h3>Build</h3><p>Реализация с ревью, контролем качества и сроков.</p></div>
-          <div class="impact-card"><h3>Scale</h3><p>Аналитика, контент, маркетинг и рост после релиза.</p></div>
+        <article class="panel case-card">
+          <p class="eyebrow">Case 02</p>
+          <h3>MentorOps</h3>
+          <p>Собрал единый контур работы менторов, ассистентов и команды разработки.</p>
+          <p class="case-result">Результат: стабильный delivery, меньше хаоса и выше качество релизов.</p>
+        </article>
+
+        <article class="panel case-card">
+          <p class="eyebrow">Case 03</p>
+          <h3>Media Growth Lab</h3>
+          <p>Связал контент, маркетинг и продукт в систему управляемых экспериментов роста.</p>
+          <p class="case-result">Результат: устойчивый охват и доверие, а не разовые всплески.</p>
         </article>
       </section>
 
-      <section id="evidence" class="scene scene--evidence reveal">
-        <article class="evidence-metrics panel fx-aurora">
-          <p class="eyebrow">Экспертиза в действии</p>
-          <h2 data-type-text="Моя сила — соединять код, продукт и управление в одну рабочую систему">
-            Моя сила — соединять код, продукт и управление в одну рабочую систему
-          </h2>
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <span>Продуктовое мышление</span>
-              <strong>От задачи к ценности</strong>
-              <p>Перед выбором языка и фреймворка оцениваю риски, ограничения и выгоду для бизнеса.</p>
-            </div>
-            <div class="metric-card">
-              <span>Лидерство</span>
-              <strong>Команда и процессы</strong>
-              <p>Руковожу разработкой и ассистентами менторов, держу темп, качество и коммуникацию.</p>
-            </div>
-            <div class="metric-card">
-              <span>Инженерия + AI</span>
-              <strong>Контроль вместо вайба</strong>
-              <p>Использую нейросети как ускоритель, но оставляю архитектурный контроль и жёсткое ревью кода.</p>
-            </div>
-            <div class="metric-card">
-              <span>Рынок и медиа</span>
-              <strong>Широкий кругозор</strong>
-              <p>Практикую Telegram, Дзен и YouTube, слежу за рынком и строю решения под реальный спрос.</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="evidence-framework panel fx-prism">
-          <p class="eyebrow">Принцип работы</p>
-          <h3>Как я оформляю результат в кейс, чтобы ему верили</h3>
-          <ul class="framework-list">
-            <li><b>Контекст:</b> бизнес-цель, ограничения и ставка проекта.</li>
-            <li><b>Проблема:</b> что мешало росту и где терялись деньги/внимание.</li>
-            <li><b>Решение:</b> конкретные инженерные и продуктовые шаги.</li>
-            <li><b>Результат:</b> метрики до/после и качественная обратная связь.</li>
-            <li><b>Роль:</b> моя зона ответственности и вклад наставников/команды.</li>
-          </ul>
-        </article>
+      <section id="planet" class="panel panel--planet reveal">
+        <p class="eyebrow">Космическая навигация</p>
+        <h2>Крути сцену, выбирай планету и переходи в другую систему с эффектом перелёта</h2>
+        <p id="planet-status" class="planet-status">Активный мир: Система Земли</p>
+        <p class="planet-note">
+          Управляй вручную: орбиты подхватывают авто-режим только спустя 5 секунд после последнего движения.
+        </p>
       </section>
 
-      <section id="cases" class="scene scene--cases reveal">
-        <article class="case-card case-card--a panel fx-aurora">
-          <p class="eyebrow">Case 01 · GrantFlow</p>
-          <h3>Разработал площадку для молодёжных проектов при грантовой поддержке</h3>
-          <p>Ключевая ценность: молодые авторы получают понятный маршрут от замысла до проектной команды и поддержки эксперта.</p>
-          <div class="case-meta">
-            <span>Роль: Product Lead + Team Lead</span>
-            <span>Формат: платформа/лента</span>
-            <span>Аудитория: школьники, студенты, эксперты</span>
-          </div>
-          <ul>
-            <li>Сократил путь от идеи до действия: публикация проекта, поиск участников и старт работы в одном окне.</li>
-            <li>Добавил экспертную обратную связь на раннем этапе, чтобы отсекать слабые сценарии до затрат на разработку.</li>
-            <li>Объединил IT, инженерные, социальные и образовательные инициативы в единой инфраструктуре роста.</li>
-          </ul>
-          <p class="case-result">Результат: больше проектов доходят до реализации, а не остаются на уровне «идеи в стол».</p>
-        </article>
-
-        <article class="case-card case-card--b panel fx-neon">
-          <p class="eyebrow">Case 02 · MentorOps</p>
-          <h3>Система менторского управления и ассистентского контура</h3>
-          <p>Сервис для синхронизации наставников, ассистентов и команды разработки в одном операционном ритме.</p>
-          <div class="case-meta">
-            <span>Роль: Руководитель направления</span>
-            <span>Фокус: процессы + качество</span>
-            <span>Формат: регулярные ревью</span>
-          </div>
-          <ul>
-            <li>Собраны регламенты задач, обратной связи и контроля результата.</li>
-            <li>Автоматизирована часть рутины по отчётам, материалам и коммуникации.</li>
-            <li>Настроена прозрачная зона ответственности между экспертами и исполнителями.</li>
-          </ul>
-          <p class="case-result">Результат: предсказуемый delivery и стабильный рост качества командной работы.</p>
-        </article>
-
-        <article class="case-card case-card--c panel fx-ember">
-          <p class="eyebrow">Case 03 · Media Growth Lab</p>
-          <h3>Контент, маркетинг и автоматизация вокруг продукта</h3>
-          <p>Практический контур продвижения: Telegram, Дзен, YouTube и рекламные сценарии как единая система.</p>
-          <div class="case-meta">
-            <span>Роль: Strategy + Production</span>
-            <span>Фокус: охват и доверие</span>
-            <span>Инструменты: контент + аналитика</span>
-          </div>
-          <ul>
-            <li>Проектируется контент-воронка от первого касания до вовлечения в продукт.</li>
-            <li>Под каждый канал подбираются формат, ритм публикаций и система экспериментов.</li>
-            <li>Процессы упрощаются через автоматизацию, чтобы команда работала быстрее и точнее.</li>
-          </ul>
-          <p class="case-result">Результат: продукт не просто создан, а получает устойчивое внимание и рост.</p>
-        </article>
+      <section id="contacts" class="panel panel--contact reveal">
+        <p class="eyebrow">Контакт</p>
+        <h2>Нужен сильный руководитель проекта — на связи</h2>
+        <p>
+          Берусь за задачи на стыке разработки, продукта, автоматизации и продвижения.
+          Сложные кейсы особенно интересны.
+        </p>
+        <div class="actions">
+          <a class="btn btn--solid" href="mailto:artemy@devmail.pro">Email</a>
+          <a class="btn btn--ghost" href="https://t.me/artemy_dev">Telegram</a>
+        </div>
       </section>
 
-      <section class="scene scene--proof-feed reveal">
-        <article class="proof-feed panel fx-prism">
-          <p class="eyebrow">Смежные сервисы</p>
-          <h2 data-type-text="Смежные сервисы вокруг продукта: разработка, управление, продвижение">
-            Смежные сервисы вокруг продукта: разработка, управление, продвижение
-          </h2>
-          <div class="proof-grid">
-            <div>
-              <h3>Продуктовая архитектура</h3>
-              <p>Проектирование ядра продукта, ролей пользователей и сценариев масштабирования.</p>
-            </div>
-            <div>
-              <h3>Delivery и управление</h3>
-              <p>Постановка процессов, контроль сроков, координация команды и коммуникация со стейкхолдерами.</p>
-            </div>
-            <div>
-              <h3>Автоматизация и AI</h3>
-              <p>Интеграция нейросетей и автоматизации под задачи бизнеса без потери контроля качества.</p>
-            </div>
-            <div>
-              <h3>Маркетинг и контент</h3>
-              <p>Продвижение продукта через контент-платформы и управляемые эксперименты роста.</p>
-            </div>
-          </div>
-        </article>
+      <section id="play-zone" class="play-zone reveal">
+        <p class="eyebrow">Свободная зона</p>
+        <h2>Нижняя орбита для интерактива: здесь ничто не перекрывает планеты</h2>
       </section>
-
-      <section class="scene scene--route reveal">
-        <article class="route-lab panel fx-grid">
-          <p class="eyebrow">Путь проекта</p>
-          <h2 data-type-text="Каждый этап — отдельная сцена с конкретным результатом">
-            Каждый этап — отдельная сцена с конкретным результатом
-          </h2>
-          <div class="route-progress"><span id="route-progress-bar"></span></div>
-          <div class="route-path">
-            <div class="route-step"><span>01</span><p>Брифинг и цели бизнеса.</p></div>
-            <div class="route-step"><span>02</span><p>Архитектура + UX стратегия.</p></div>
-            <div class="route-step"><span>03</span><p>Реализация и менторские итерации.</p></div>
-            <div class="route-step"><span>04</span><p>Release и рост продукта.</p></div>
-          </div>
-        </article>
-      </section>
-
-      <section id="planet-lab" class="scene scene--planet-lab reveal">
-        <article class="planet-lab panel fx-neon">
-          <p class="eyebrow">Космическая навигация</p>
-          <h2>Выбирай миры вращением сцены и переключайся между режимами портфолио</h2>
-          <p>
-            Здесь тема меняется как в путешествии по галактике: другой свет, другая динамика и другое
-            эмоциональное ощущение проекта.
-          </p>
-          <p id="planet-status" class="planet-status">Активный мир: система Земли</p>
-          <p class="planet-tip">Поверни сцену, выбери планету и почувствуй плавный межзвёздный переход.</p>
-        </article>
-      </section>
-
-      <section id="contacts" class="scene scene--finale reveal">
-        <article class="finale-core panel fx-ember fx-pulse">
-          <p class="eyebrow">Связаться со мной</p>
-          <h2 data-type-text="Нужен сильный руководитель проекта? Соберу идею, команду и доведу до результата">
-            Нужен сильный руководитель проекта? Соберу идею, команду и доведу до результата
-          </h2>
-          <p>
-            Работаю на стыке разработки, продукта, автоматизации и продвижения. Беру ответственность
-            за delivery, качество и конечный бизнес-эффект.
-          </p>
-          <div class="hero-actions">
-            <a class="btn btn--solid magnetic" href="mailto:artemy@devmail.pro">Email</a>
-            <a class="btn btn--ghost magnetic" href="https://t.me/artemy_dev">Telegram</a>
-          </div>
-        </article>
-      </section>
-
-      <section class="scene scene--playground" aria-hidden="true"></section>
     </main>
 
     <footer class="footer">
-      <div class="container footer__content">
+      <div class="container footer__row">
         <p>
-          © <span id="year"></span> Кожакин Артемий.
-          3D models from
-          <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf" target="_blank" rel="noreferrer noopener"
-            >three.js examples</a
-          >
-          and textures from
-          <a href="https://threejs.org/examples/#webgl_shaders_ocean" target="_blank" rel="noreferrer noopener"
-            >three.js</a
-          >
-          /
-          <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer noopener"
-            >Solar System Scope</a
-          >.
+          © <span id="year"></span> Артемий Кожакин.
+          3D-модель: <a href="https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf" target="_blank" rel="noreferrer noopener">three.js examples</a>.
+          Текстуры: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer noopener">Solar System Scope</a>.
         </p>
       </div>
     </footer>
 
-    <script>
-      (function () {
-        function forceHide() {
-          var preloader = document.getElementById("preloader");
-          if (preloader) {
-            preloader.classList.add("is-exit");
-            setTimeout(function () {
-              preloader.classList.add("is-hidden");
-            }, 920);
-          }
-          document.body.classList.remove("show-preloader");
-          document.body.classList.remove("js-ready");
-        }
-        window.__forceHidePreloader = forceHide;
-        setTimeout(forceHide, 4200);
-        window.addEventListener("error", function () {
-          setTimeout(forceHide, 250);
-        });
-        window.addEventListener("unhandledrejection", function () {
-          setTimeout(forceHide, 250);
-        });
-      })();
-    </script>
-    <script type="module" src="./script.js?v=20260418-fix24"></script>
+    <script type="module" src="./script.js?v=20260418-fix26"></script>
   </body>
 </html>

@@ -1,38 +1,17 @@
 import * as THREE from "https://esm.sh/three@0.161.0";
 import { GLTFLoader } from "https://esm.sh/three@0.161.0/examples/jsm/loaders/GLTFLoader.js";
 
-const prefersReducedMotion = window.matchMedia(
-  "(prefers-reduced-motion: reduce)"
-).matches;
-const isMobileViewport = window.matchMedia("(max-width: 860px)").matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const yearNode = document.querySelector("#year");
 if (yearNode) {
   yearNode.textContent = String(new Date().getFullYear());
 }
 
-const preloaderNode = document.querySelector("#preloader");
-const preloaderStatusNode = document.querySelector("#preloader-status");
-const preloaderMeterFillNode = document.querySelector("#preloader-meter-fill");
-const preloaderCanvas = document.querySelector("#preloader-canvas");
-const earthCanvas = document.querySelector("#earth-canvas");
-
 const themeMap = {
-  earth: {
-    bodyClass: "theme-earth",
-    accent: 0x66abff,
-    label: "Система Земли"
-  },
-  neon: {
-    bodyClass: "theme-neon",
-    accent: 0x66ffe8,
-    label: "Бирюзовая орбита"
-  },
-  ember: {
-    bodyClass: "theme-ember",
-    accent: 0xffb06a,
-    label: "Янтарная орбита"
-  }
+  earth: { bodyClass: "theme-earth", label: "Система Земли" },
+  neon: { bodyClass: "theme-neon", label: "Бирюзовая система" },
+  ember: { bodyClass: "theme-ember", label: "Янтарная система" }
 };
 
 let currentTheme = "earth";
@@ -44,1526 +23,85 @@ function applyTheme(themeKey) {
   currentTheme = themeKey;
   document.body.classList.remove("theme-earth", "theme-neon", "theme-ember");
   document.body.classList.add(themeMap[themeKey].bodyClass);
-  const planetStatus = document.querySelector("#planet-status");
-  if (planetStatus) {
-    planetStatus.textContent = `Активный мир: ${themeMap[themeKey].label}`;
+  const statusNode = document.querySelector("#planet-status");
+  if (statusNode) {
+    statusNode.textContent = `Активный мир: ${themeMap[themeKey].label}`;
   }
-  document.dispatchEvent(
-    new CustomEvent("system-theme-change", {
-      detail: { themeKey }
-    })
-  );
 }
 
-const revealNodes = [...document.querySelectorAll(".reveal")];
-revealNodes.forEach((node) => {
-  if (node.dataset.delay) {
-    node.style.setProperty("--delay", `${node.dataset.delay}ms`);
+function initReveal() {
+  const nodes = [...document.querySelectorAll(".reveal")];
+  if (nodes.length === 0) {
+    return;
   }
-});
-
-if ("IntersectionObserver" in window) {
-  const revealObserver = new IntersectionObserver(
-    (entries, observer) => {
+  if (!("IntersectionObserver" in window) || prefersReducedMotion) {
+    nodes.forEach((node) => node.classList.add("is-visible"));
+    return;
+  }
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) {
           return;
         }
         entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
+        obs.unobserve(entry.target);
       });
     },
-    {
-      threshold: 0.16,
-      rootMargin: "0px 0px -8% 0px"
-    }
+    { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
   );
-  revealNodes.forEach((node) => revealObserver.observe(node));
-} else {
-  revealNodes.forEach((node) => node.classList.add("is-visible"));
+  nodes.forEach((node) => observer.observe(node));
 }
 
-const gltfLoader = new GLTFLoader();
-const textureLoader = new THREE.TextureLoader();
-
-const urls = {
-  rocket: "./assets/PrimaryIonDrive.glb",
-  earthAlbedo: "./assets/textures/earth_atmos_2048.jpg",
-  earthNormal: "./assets/textures/earth_normal_2048.jpg",
-  earthSpecular: "./assets/textures/earth_specular_2048.jpg",
-  earthClouds: "./assets/textures/earth_clouds_1024.png",
-  moonAlbedo: "./assets/textures/moon_1024.jpg",
-  neptuneAlbedo: "./assets/textures/2k_neptune.jpg",
-  saturnAlbedo: "./assets/textures/2k_saturn.jpg",
-  jupiterAlbedo: "./assets/textures/2k_jupiter.jpg"
-};
-
-const loadMessages = [
-  "Открываю звёздный коридор...",
-  "Запускаю экспедицию artkozk...",
-  "Собираю космическую сцену...",
-  "Проявляю далекие миры...",
-  "Калибрую свет и глубину...",
-  "Финальная синхронизация...",
-  "Сцена готова к погружению..."
-];
-
-const loadState = {
-  total: 0,
-  done: 0
-};
-
-const loadingPromises = [];
-
-function trackPromise(promise) {
-  loadState.total += 1;
-  const wrapped = promise.finally(() => {
-    loadState.done += 1;
-    const progress = Math.min(100, Math.round((loadState.done / Math.max(loadState.total, 1)) * 100));
-    const msgIndex = Math.min(
-      loadMessages.length - 1,
-      Math.floor((loadState.done / Math.max(loadState.total, 1)) * loadMessages.length)
-    );
-    if (preloaderStatusNode) {
-      preloaderStatusNode.textContent = loadMessages[msgIndex];
-    }
-    if (preloaderMeterFillNode) {
-      preloaderMeterFillNode.style.width = `${Math.max(progress, 12)}%`;
-    }
-  });
-  loadingPromises.push(wrapped);
-  return wrapped;
-}
-
-function loadGltf(url) {
-  return new Promise((resolve) => {
-    gltfLoader.load(
-      url,
-      (gltf) => resolve(gltf),
-      undefined,
-      () => resolve(null)
-    );
-  });
-}
-
-function loadTexture(url) {
-  return new Promise((resolve) => {
-    textureLoader.load(
-      url,
-      (texture) => resolve(texture),
-      undefined,
-      () => resolve(null)
-    );
-  });
-}
-
-function loadVideo(videoElement) {
-  return new Promise((resolve) => {
-    if (!videoElement) {
-      resolve();
-      return;
-    }
-    if (videoElement.readyState >= 2) {
-      resolve();
-      return;
-    }
-    const done = () => resolve();
-    videoElement.addEventListener("loadeddata", done, { once: true });
-    videoElement.addEventListener("error", done, { once: true });
-    videoElement.play().catch(() => {});
-  });
-}
-
-const assets = {
-  rocket: null,
-  textures: {
-    earthAlbedo: null,
-    earthNormal: null,
-    earthSpecular: null,
-    earthClouds: null,
-    moonAlbedo: null,
-    neptuneAlbedo: null,
-    saturnAlbedo: null,
-    jupiterAlbedo: null
-  }
-};
-
-const rocketPromise = trackPromise(loadGltf(urls.rocket)).then((result) => {
-  assets.rocket = result;
-});
-const earthAlbedoPromise = trackPromise(loadTexture(urls.earthAlbedo)).then((texture) => {
-  assets.textures.earthAlbedo = texture;
-});
-const earthNormalPromise = trackPromise(loadTexture(urls.earthNormal)).then((texture) => {
-  assets.textures.earthNormal = texture;
-});
-const earthSpecularPromise = trackPromise(loadTexture(urls.earthSpecular)).then((texture) => {
-  assets.textures.earthSpecular = texture;
-});
-const earthCloudsPromise = trackPromise(loadTexture(urls.earthClouds)).then((texture) => {
-  assets.textures.earthClouds = texture;
-});
-const moonAlbedoPromise = trackPromise(loadTexture(urls.moonAlbedo)).then((texture) => {
-  assets.textures.moonAlbedo = texture;
-});
-const neptuneAlbedoPromise = trackPromise(loadTexture(urls.neptuneAlbedo)).then((texture) => {
-  assets.textures.neptuneAlbedo = texture;
-});
-const saturnAlbedoPromise = trackPromise(loadTexture(urls.saturnAlbedo)).then((texture) => {
-  assets.textures.saturnAlbedo = texture;
-});
-const jupiterAlbedoPromise = trackPromise(loadTexture(urls.jupiterAlbedo)).then((texture) => {
-  assets.textures.jupiterAlbedo = texture;
-});
-
-document.querySelectorAll(".video-ribbon video").forEach((video) => {
-  trackPromise(loadVideo(video));
-});
-
-const preloaderStart = performance.now();
-let heavyScenesInitialized = false;
-let preloaderFinished = false;
-
-function finishPreloader() {
-  if (preloaderFinished) {
+function initTypeOnView() {
+  if (prefersReducedMotion) {
     return;
   }
-  preloaderFinished = true;
-  if (preloaderStatusNode) {
-    preloaderStatusNode.textContent = "Стыковка завершена";
-  }
-  if (preloaderMeterFillNode) {
-    preloaderMeterFillNode.style.width = "100%";
-  }
-  document.body.classList.remove("show-preloader");
-  document.body.classList.remove("js-ready");
-  document.body.classList.add("site-live");
-
-  if (preloaderNode && !preloaderNode.classList.contains("is-hidden")) {
-    preloaderNode.classList.add("is-exit");
-    setTimeout(() => {
-      preloaderNode.classList.add("is-hidden");
-    }, 940);
-  } else if (typeof window.__forceHidePreloader === "function") {
-    window.__forceHidePreloader();
-  }
-  document.body.classList.remove("is-loading");
-}
-
-let siteBooted = false;
-function bootSite() {
-  if (siteBooted) {
-    return;
-  }
-  siteBooted = true;
-  initHeavyScenes();
-  finishPreloader();
-}
-
-Promise.allSettled(loadingPromises).then(() => {
-  const elapsed = performance.now() - preloaderStart;
-  const wait = Math.max(0, 1800 - elapsed);
-  setTimeout(() => {
-    bootSite();
-  }, wait);
-});
-setTimeout(() => {
-  bootSite();
-}, 3000);
-setTimeout(() => {
-  if (document.body.classList.contains("show-preloader")) {
-    finishPreloader();
-  }
-}, 6500);
-
-function createRenderer(canvas) {
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    alpha: true
-  });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  return renderer;
-}
-
-function createStarField(scene, count = 900, spread = 120, opacity = 0.55) {
-  const densityFactor = isMobileViewport ? 0.55 : 1;
-  const pointsCount = Math.max(180, Math.floor(count * densityFactor));
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(pointsCount * 3);
-  for (let i = 0; i < pointsCount; i += 1) {
-    const i3 = i * 3;
-    positions[i3] = (Math.random() - 0.5) * spread;
-    positions[i3 + 1] = (Math.random() - 0.5) * spread;
-    positions[i3 + 2] = (Math.random() - 0.5) * spread;
-  }
-  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  const points = new THREE.Points(
-    geometry,
-    new THREE.PointsMaterial({
-      color: 0xaed3ff,
-      size: 0.09,
-      transparent: true,
-      opacity
-    })
-  );
-  scene.add(points);
-  return points;
-}
-
-function createPlanetSurfaceTexture(themeKey) {
-  const size = 768;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    return null;
-  }
-
-  const baseGradient = ctx.createRadialGradient(
-    size * 0.36,
-    size * 0.32,
-    size * 0.12,
-    size * 0.5,
-    size * 0.5,
-    size * 0.66
-  );
-  if (themeKey === "ember") {
-    baseGradient.addColorStop(0, "#ffca88");
-    baseGradient.addColorStop(0.28, "#e38448");
-    baseGradient.addColorStop(0.62, "#7d2f2d");
-    baseGradient.addColorStop(1, "#30131b");
-  } else {
-    baseGradient.addColorStop(0, "#aef2ff");
-    baseGradient.addColorStop(0.3, "#3ebbd8");
-    baseGradient.addColorStop(0.64, "#1f4f86");
-    baseGradient.addColorStop(1, "#09172d");
-  }
-  ctx.fillStyle = baseGradient;
-  ctx.fillRect(0, 0, size, size);
-
-  ctx.globalAlpha = themeKey === "ember" ? 0.18 : 0.2;
-  for (let i = 0; i < 1600; i += 1) {
-    const x = Math.random() * size;
-    const y = Math.random() * size;
-    const r = 0.8 + Math.random() * 3.4;
-    const tint =
-      themeKey === "ember"
-        ? `rgba(${190 + Math.floor(Math.random() * 65)}, ${80 + Math.floor(Math.random() * 70)}, ${45 + Math.floor(Math.random() * 40)}, 1)`
-        : `rgba(${55 + Math.floor(Math.random() * 65)}, ${120 + Math.floor(Math.random() * 110)}, ${165 + Math.floor(Math.random() * 90)}, 1)`;
-    ctx.fillStyle = tint;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.globalAlpha = themeKey === "ember" ? 0.2 : 0.16;
-  ctx.lineWidth = themeKey === "ember" ? 3.2 : 2.6;
-  for (let i = 0; i < 18; i += 1) {
-    ctx.beginPath();
-    ctx.strokeStyle =
-      themeKey === "ember" ? "rgba(255,198,120,0.58)" : "rgba(155,240,255,0.52)";
-    let sx = -40 + Math.random() * (size + 80);
-    let sy = Math.random() * size;
-    ctx.moveTo(sx, sy);
-    for (let k = 0; k < 5; k += 1) {
-      sx += size * 0.2;
-      sy += (Math.random() - 0.5) * 120;
-      ctx.quadraticCurveTo(
-        sx - size * 0.08,
-        sy + (Math.random() - 0.5) * 80,
-        sx,
-        sy
-      );
-    }
-    ctx.stroke();
-  }
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  return tex;
-}
-
-function initPreloaderScene() {
-  if (!preloaderCanvas) {
-    return;
-  }
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
-    46,
-    preloaderCanvas.clientWidth / preloaderCanvas.clientHeight,
-    0.1,
-    120
-  );
-  camera.position.set(0, 0.2, 8);
-  const renderer = createRenderer(preloaderCanvas);
-
-  const ambient = new THREE.AmbientLight(0x7092c9, 0.7);
-  const key = new THREE.DirectionalLight(0xffffff, 1.2);
-  key.position.set(3, 1, 4);
-  scene.add(ambient, key);
-
-  const stars = createStarField(scene, 1400, 220, 0.6);
-  const streaks = [];
-  const streakCount = isMobileViewport ? 12 : 24;
-  for (let i = 0; i < streakCount; i += 1) {
-    const streak = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.01, 0.04, 2.2 + Math.random() * 3.8, 10, 1, true),
-      new THREE.MeshBasicMaterial({
-        color: 0x7fc2ff,
-        transparent: true,
-        opacity: 0.12 + Math.random() * 0.14,
-        depthWrite: false
-      })
-    );
-    streak.rotation.z = Math.PI * 0.5;
-    streak.position.set(
-      -6 + Math.random() * 12,
-      (Math.random() - 0.5) * 3.6,
-      -3.6 + Math.random() * 7.2
-    );
-    streak.userData.speed = 0.028 + Math.random() * 0.07;
-    streak.userData.wave = Math.random() * Math.PI * 2;
-    scene.add(streak);
-    streaks.push(streak);
-  }
-
-  const placeholder = new THREE.Mesh(
-    new THREE.ConeGeometry(0.28, 1.4, 16),
-    new THREE.MeshStandardMaterial({
-      color: 0x8cbefc,
-      metalness: 0.35,
-      roughness: 0.4
-    })
-  );
-  placeholder.rotation.z = Math.PI / 2;
-  placeholder.position.set(-5.5, -0.1, 1.8);
-  scene.add(placeholder);
-
-  let rocket = null;
-  rocketPromise.then(() => {
-    if (!assets.rocket?.scene || preloaderNode?.classList.contains("is-hidden")) {
-      return;
-    }
-    rocket = assets.rocket.scene.clone(true);
-    rocket.scale.setScalar(0.65);
-    rocket.position.copy(placeholder.position);
-    rocket.rotation.set(0.2, Math.PI / 2, -0.15);
-    scene.add(rocket);
-    scene.remove(placeholder);
-  });
-
-  const clock = new THREE.Clock();
-  const animate = () => {
-    if (preloaderNode?.classList.contains("is-hidden")) {
-      return;
-    }
-    requestAnimationFrame(animate);
-    const t = clock.getElapsedTime();
-    stars.rotation.y = t * 0.028;
-    streaks.forEach((streak, index) => {
-      const wave = Math.sin(t * 2.8 + streak.userData.wave + index * 0.12) * 0.07;
-      streak.position.x += streak.userData.speed;
-      streak.position.y += wave * 0.08;
-      if (streak.position.x > 6.4) {
-        streak.position.x = -6.4;
-      }
-    });
-    const actor = rocket || placeholder;
-    if (actor) {
-      const p = Math.min(1, t / 2.8);
-      actor.position.x = -5.5 + p * 12;
-      actor.position.y = -0.1 + Math.sin(t * 2.5) * 0.1;
-      actor.position.z = 1.8 - p * 4.8;
-      actor.rotation.z = -0.15 + p * 0.32;
-      actor.rotation.y = Math.PI / 2 + p * 0.22;
-    }
-    renderer.render(scene, camera);
-  };
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = preloaderCanvas.clientWidth / preloaderCanvas.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(preloaderCanvas.clientWidth, preloaderCanvas.clientHeight);
-  });
-}
-
-let flightOverlayTimer = null;
-function triggerFlightOverlay(themeKey) {
-  const overlayNode = document.querySelector("#flight-overlay");
-  if (!overlayNode) {
-    return;
-  }
-  const statusNode = document.querySelector("#flight-status");
-  if (statusNode && themeMap[themeKey]) {
-    statusNode.textContent = `Гиперпереход: ${themeMap[themeKey].label}`;
-  }
-  overlayNode.classList.remove("is-active");
-  void overlayNode.offsetWidth;
-  overlayNode.classList.add("is-active");
-  if (flightOverlayTimer) {
-    clearTimeout(flightOverlayTimer);
-  }
-  flightOverlayTimer = setTimeout(() => {
-    overlayNode.classList.remove("is-active");
-  }, prefersReducedMotion ? 520 : 1450);
-}
-
-function initEarthScene() {
-  if (!earthCanvas) {
-    return;
-  }
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
-    43,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    220
-  );
-  camera.position.set(0, 0.08, 7.1);
-  const renderer = createRenderer(earthCanvas);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  const ambient = new THREE.AmbientLight(0x7697c8, 0.72);
-  const key = new THREE.DirectionalLight(0xffffff, 1.25);
-  key.position.set(5.8, 2.1, 5.4);
-  const rim = new THREE.DirectionalLight(0x73c4ff, 0.58);
-  rim.position.set(-5.2, -2.2, -4.2);
-  scene.add(ambient, key, rim);
-
-  const stars = createStarField(scene, 1800, 185, 0.58);
-  const worldRig = new THREE.Group();
-  scene.add(worldRig);
-
-  const earthMat = new THREE.MeshPhongMaterial({
-    color: 0x4f84d8,
-    shininess: 22
-  });
-  let earthMapsApplied = false;
-  const applyEarthMaps = () => {
-    let changed = false;
-    if (!earthMat.map && assets.textures.earthAlbedo) {
-      assets.textures.earthAlbedo.colorSpace = THREE.SRGBColorSpace;
-      earthMat.map = assets.textures.earthAlbedo;
-      changed = true;
-    }
-    if (!earthMat.normalMap && assets.textures.earthNormal) {
-      earthMat.normalMap = assets.textures.earthNormal;
-      earthMat.normalScale = new THREE.Vector2(0.92, 0.92);
-      changed = true;
-    }
-    if (!earthMat.specularMap && assets.textures.earthSpecular) {
-      earthMat.specularMap = assets.textures.earthSpecular;
-      earthMat.specular = new THREE.Color(0x3f6598);
-      changed = true;
-    }
-    if (changed) {
-      earthMat.needsUpdate = true;
-    }
-    earthMapsApplied = Boolean(earthMat.map && earthMat.normalMap && earthMat.specularMap);
-  };
-  if (assets.textures.earthAlbedo) {
-    assets.textures.earthAlbedo.colorSpace = THREE.SRGBColorSpace;
-    earthMat.map = assets.textures.earthAlbedo;
-  }
-  if (assets.textures.earthNormal) {
-    earthMat.normalMap = assets.textures.earthNormal;
-    earthMat.normalScale = new THREE.Vector2(0.92, 0.92);
-  }
-  if (assets.textures.earthSpecular) {
-    earthMat.specularMap = assets.textures.earthSpecular;
-    earthMat.specular = new THREE.Color(0x3f6598);
-  }
-  applyEarthMaps();
-
-  const earthGroup = new THREE.Group();
-  const earthMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(2.08, 120, 120),
-    earthMat
-  );
-  earthGroup.add(earthMesh);
-  const earthHitArea = new THREE.Mesh(
-    new THREE.SphereGeometry(2.5, 20, 20),
-    new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.01,
-      depthWrite: false
-    })
-  );
-  earthHitArea.userData.themeKey = "earth";
-  earthGroup.add(earthHitArea);
-  worldRig.add(earthGroup);
-
-  const cloudMat = new THREE.MeshPhongMaterial({
-    map: assets.textures.earthClouds || null,
-    transparent: true,
-    opacity: assets.textures.earthClouds ? 0.42 : 0,
-    depthWrite: false
-  });
-  const cloudMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(2.13, 80, 80),
-    cloudMat
-  );
-  earthGroup.add(cloudMesh);
-
-  const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(2.34, 56, 56),
-    new THREE.MeshBasicMaterial({
-      color: 0x75b5ff,
-      transparent: true,
-      opacity: 0.08,
-      side: THREE.BackSide
-    })
-  );
-  earthGroup.add(atmosphere);
-
-  const planetSystems = [
-    { key: "earth", baseAngle: 0, anchor: earthGroup, mesh: earthMesh },
-    { key: "neon", baseAngle: 2.36, anchor: null, mesh: null },
-    { key: "ember", baseAngle: -2.18, anchor: null, mesh: null }
-  ];
-  const remotePlanetMeshes = [];
-  const remotePlanetHitAreas = [];
-  const remoteFrontnessByTheme = new Map([
-    ["earth", 1],
-    ["neon", 0],
-    ["ember", 0]
-  ]);
-
-  const remoteDefs = [
-    {
-      key: "neon",
-      color: 0xf3f6ff,
-      glow: 0xb6dcff,
-      radius: 0.64,
-      baseY: 0.66,
-      mapKey: "jupiterAlbedo",
-      normalKey: null,
-      roughness: 0.62,
-      metalness: 0.06,
-      orbitSpeed: 0.1,
-      orbitRadius: 12.8,
-      zBias: -6.8,
-      focusX: 2.56
-    },
-    {
-      key: "ember",
-      color: 0xf2e2d1,
-      glow: 0xf7c59a,
-      radius: 0.58,
-      baseY: 0.4,
-      mapKey: "saturnAlbedo",
-      normalKey: null,
-      roughness: 0.64,
-      metalness: 0.05,
-      orbitSpeed: -0.08,
-      orbitRadius: 11.9,
-      zBias: -7.2,
-      focusX: -2.5
-    }
-  ];
-
-  const proceduralSurfaceMap = {
-    neon: createPlanetSurfaceTexture("neon"),
-    ember: createPlanetSurfaceTexture("ember")
-  };
-
-  const remoteOrbitRadius = 10.4;
-  remoteDefs.forEach((def) => {
-    const slot = planetSystems.find((item) => item.key === def.key);
-    if (!slot) {
-      return;
-    }
-    const anchor = new THREE.Group();
-    const fallbackMap = proceduralSurfaceMap[def.key] || null;
-    const bodyMaterial = new THREE.MeshPhysicalMaterial({
-      color: def.color,
-      transparent: true,
-      opacity: 0.16,
-      roughness: def.roughness ?? 0.56,
-      metalness: def.metalness ?? 0.08,
-      clearcoat: 0.52,
-      clearcoatRoughness: 0.31,
-      emissive: new THREE.Color(def.glow).multiplyScalar(0.11),
-      map: fallbackMap
-    });
-    if (def.mapKey && assets.textures[def.mapKey]) {
-      const mapTexture = assets.textures[def.mapKey];
-      mapTexture.colorSpace = THREE.SRGBColorSpace;
-      bodyMaterial.map = mapTexture;
-    }
-    if (def.normalKey && assets.textures[def.normalKey]) {
-      bodyMaterial.normalMap = assets.textures[def.normalKey];
-      bodyMaterial.normalScale = new THREE.Vector2(0.76, 0.76);
-    }
-    const body = new THREE.Mesh(
-      new THREE.SphereGeometry(def.radius, 72, 72),
-      bodyMaterial
-    );
-    anchor.position.set(
-      Math.sin(slot.baseAngle) * (def.orbitRadius || remoteOrbitRadius),
-      def.baseY,
-      Math.cos(slot.baseAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
-    );
-    anchor.add(body);
-
-    const hitArea = new THREE.Mesh(
-      new THREE.SphereGeometry(def.radius * 1.58, 20, 20),
-      new THREE.MeshBasicMaterial({
-        transparent: true,
-        opacity: 0.01,
-        depthWrite: false
-      })
-    );
-    hitArea.userData.themeKey = def.key;
-    anchor.add(hitArea);
-
-    worldRig.add(anchor);
-    body.userData.themeKey = def.key;
-    remotePlanetMeshes.push(body);
-    remotePlanetHitAreas.push(hitArea);
-
-    slot.anchor = anchor;
-    slot.mesh = body;
-    slot.baseY = def.baseY;
-    slot.halo = null;
-    slot.hitArea = hitArea;
-    slot.def = def;
-    slot.defaultPos = anchor.position.clone();
-    slot.fallbackMap = fallbackMap;
-    slot.orbitAngle = slot.baseAngle;
-  });
-  const earthSlot = planetSystems.find((item) => item.key === "earth");
-  if (earthSlot) {
-    earthSlot.defaultPos = new THREE.Vector3(0, 0, 0);
-  }
-
-  const orbitGuide = new THREE.Mesh(
-    new THREE.TorusGeometry(remoteOrbitRadius, 0.03, 8, 180),
-    new THREE.MeshBasicMaterial({
-      color: 0x5b9aff,
-      transparent: true,
-      opacity: 0.02
-    })
-  );
-  orbitGuide.rotation.x = Math.PI * 0.5;
-  orbitGuide.position.z = -2.5;
-  worldRig.add(orbitGuide);
-
-  const asteroidTracks = [];
-  const asteroidBelt = new THREE.Group();
-  worldRig.add(asteroidBelt);
-  const asteroidCount = isMobileViewport ? 2 : 4;
-  for (let i = 0; i < asteroidCount; i += 1) {
-    const size = 0.018 + Math.random() * 0.028;
-    const rock = new THREE.Mesh(
-      new THREE.DodecahedronGeometry(size, 0),
-      new THREE.MeshStandardMaterial({
-        color: new THREE.Color().setHSL(0.56 + Math.random() * 0.05, 0.12, 0.34 + Math.random() * 0.09),
-        roughness: 0.94,
-        metalness: 0.03,
-        transparent: true,
-        opacity: 0.72
-      })
-    );
-    asteroidBelt.add(rock);
-    asteroidTracks.push({
-      mesh: rock,
-      radius: 3.25 + Math.random() * 0.92,
-      speed: 0.15 + Math.random() * 0.11,
-      phase: Math.random() * Math.PI * 2,
-      yPhase: Math.random() * Math.PI * 2,
-      baseY: -0.08 + (Math.random() - 0.5) * 0.22,
-      spinX: (Math.random() - 0.5) * 0.04,
-      spinY: (Math.random() - 0.5) * 0.06
-    });
-  }
-
-  const moonTracks = [];
-  const moonGroup = new THREE.Group();
-  worldRig.add(moonGroup);
-  const moonDefs = [
-    { radius: 4.55, size: 0.11, speed: 0.2, phase: 0.35, tone: 0.58, y: 0.2, mapKey: "moonAlbedo" },
-    { radius: 5.18, size: 0.08, speed: 0.14, phase: 2.4, tone: 0.5, y: -0.22, mapKey: "jupiterAlbedo" }
-  ];
-  moonDefs.forEach((def, index) => {
-    const moonMap = def.mapKey ? assets.textures[def.mapKey] || null : null;
-    const moonMat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setHSL(0.58, 0.16, def.tone),
-      roughness: 0.78,
-      metalness: 0.04,
-      map: moonMap
-    });
-    if (moonMat.map) {
-      moonMat.map.colorSpace = THREE.SRGBColorSpace;
-    }
-    const moon = new THREE.Mesh(
-      new THREE.SphereGeometry(def.size, 24, 24),
-      moonMat
-    );
-    moonGroup.add(moon);
-    moonTracks.push({
-      mesh: moon,
-      radius: def.radius,
-      speed: def.speed,
-      phase: def.phase,
-      baseY: def.y,
-      wobble: 0.18 + index * 0.08
-    });
-  });
-
-  let dragActive = false;
-  let dragDistance = 0;
-  let pointerStartX = 0;
-  let pointerStartY = 0;
-  let pointerMaybeClick = false;
-  let pointerDownTheme = null;
-  let draggingRemoteTheme = null;
-  let lastX = 0;
-  let lastY = 0;
-  let worldRotationY = 0;
-  let worldTiltX = 0.03;
-  let spinVelocity = 0;
-  let tiltVelocity = 0;
-  let activeTheme = currentTheme;
-  let revealEnergy = 0.12;
-  let flightBoost = 0;
-  let travelStartAt = 0;
-  let travelDurationMs = prefersReducedMotion ? 420 : 1280;
-  let travelToTheme = "earth";
-  let themeTravelUntil = 0;
-  let manualControlUntil = 0;
-  let autoOrbitPausedUntil = 0;
-  let orbitClock = 0;
-  let prevFrameMs = performance.now();
-
-  const baseSpin = prefersReducedMotion ? 0.00016 : 0.00034;
-  const raycaster = new THREE.Raycaster();
-  const pointerNdc = new THREE.Vector2();
-  const cameraLookTarget = new THREE.Vector3(0, 0, 0);
-  const tmpTarget = new THREE.Vector3();
-
-  const commitTheme = (themeKey) => {
-    if (!themeMap[themeKey]) {
-      return;
-    }
-    if (themeKey === activeTheme) {
-      return;
-    }
-    activeTheme = themeKey;
-    travelToTheme = themeKey;
-    travelStartAt = performance.now();
-    applyTheme(themeKey);
-    flightBoost = 1.72;
-    themeTravelUntil = travelStartAt + travelDurationMs;
-    manualControlUntil = performance.now() + 1200;
-    autoOrbitPausedUntil = performance.now() + 1200;
-    triggerFlightOverlay(themeKey);
-  };
-
-  const onThemeChange = (event) => {
-    const themeKey = event.detail?.themeKey;
-    if (!themeMap[themeKey]) {
-      return;
-    }
-    activeTheme = themeKey;
-  };
-  document.addEventListener("system-theme-change", onThemeChange);
-
-  const pickRemoteTheme = (clientX, clientY) => {
-    const rect = earthCanvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) {
-      return null;
-    }
-    pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-    pointerNdc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(pointerNdc, camera);
-    const candidates = [earthHitArea, ...remotePlanetHitAreas, ...remotePlanetMeshes];
-    const intersections = raycaster.intersectObjects(candidates, false);
-    for (const entry of intersections) {
-      const themeKey = entry?.object?.userData?.themeKey;
-      if (!themeKey) {
-        continue;
-      }
-      if (themeKey === "earth") {
-        return "earth";
-      }
-      const frontness = remoteFrontnessByTheme.get(themeKey) ?? 0;
-      if (frontness > 0.08 || activeTheme === themeKey) {
-        return themeKey;
-      }
-    }
-    return null;
-  };
-
-  earthCanvas.addEventListener("pointerdown", (event) => {
-    const pickedTheme = pickRemoteTheme(event.clientX, event.clientY);
-    pointerDownTheme = pickedTheme;
-    draggingRemoteTheme = pickedTheme && pickedTheme !== "earth" ? pickedTheme : null;
-    pointerStartX = event.clientX;
-    pointerStartY = event.clientY;
-    pointerMaybeClick = true;
-    dragActive = true;
-    dragDistance = 0;
-    revealEnergy = Math.max(revealEnergy, 0.28);
-    manualControlUntil = Number.POSITIVE_INFINITY;
-    autoOrbitPausedUntil = Number.POSITIVE_INFINITY;
-    document.body.classList.add("earth-dragging");
-    lastX = event.clientX;
-    lastY = event.clientY;
-    earthCanvas.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
-
-  earthCanvas.addEventListener("pointermove", (event) => {
-    if (!dragActive) {
-      const hoverTheme = pickRemoteTheme(event.clientX, event.clientY);
-      earthCanvas.style.cursor = hoverTheme ? "pointer" : "grab";
-      return;
-    }
-    const dx = event.clientX - lastX;
-    const dy = event.clientY - lastY;
-    if (draggingRemoteTheme) {
-      const slot = planetSystems.find((item) => item.key === draggingRemoteTheme);
-      if (slot) {
-        slot.orbitAngle = (slot.orbitAngle ?? slot.baseAngle) + dx * 0.0048;
-        slot.baseY = THREE.MathUtils.clamp(slot.baseY + dy * -0.0034, -0.05, 1.08);
-      }
-    } else {
-      worldRotationY += dx * 0.0045;
-      worldTiltX = THREE.MathUtils.clamp(worldTiltX + dy * 0.0016, -0.2, 0.18);
-      spinVelocity = dx * 0.0006;
-      tiltVelocity = dy * 0.00008;
-    }
-    dragDistance += Math.abs(dx) + Math.abs(dy);
-    if (Math.abs(event.clientX - pointerStartX) + Math.abs(event.clientY - pointerStartY) > 8) {
-      pointerMaybeClick = false;
-    }
-    revealEnergy = Math.min(1, revealEnergy + Math.min(0.26, (Math.abs(dx) + Math.abs(dy)) * 0.0042));
-    lastX = event.clientX;
-    lastY = event.clientY;
-    event.preventDefault();
-  });
-
-  const releaseEarthDrag = (event) => {
-    const cancelled =
-      event?.type === "pointercancel" || event?.type === "lostpointercapture";
-    const movedSinceDown =
-      Math.abs((event?.clientX ?? pointerStartX) - pointerStartX) +
-      Math.abs((event?.clientY ?? pointerStartY) - pointerStartY);
-    if (!cancelled && pointerMaybeClick && movedSinceDown < 8) {
-      const pickedTheme =
-        pointerDownTheme ||
-        pickRemoteTheme(event?.clientX ?? pointerStartX, event?.clientY ?? pointerStartY);
-      if (pickedTheme) {
-        commitTheme(pickedTheme);
-        revealEnergy = Math.max(revealEnergy, 0.56);
-      }
-    }
-    pointerMaybeClick = false;
-    pointerDownTheme = null;
-    draggingRemoteTheme = null;
-    if (!dragActive) {
-      return;
-    }
-    dragActive = false;
-    document.body.classList.remove("earth-dragging");
-    if (event?.pointerId !== undefined && earthCanvas.hasPointerCapture(event.pointerId)) {
-      earthCanvas.releasePointerCapture(event.pointerId);
-    }
-    manualControlUntil = performance.now() + 5000;
-    autoOrbitPausedUntil = performance.now() + 5000;
-    // explicit planet click controls theme switch
-  };
-  earthCanvas.addEventListener("pointerup", releaseEarthDrag);
-  earthCanvas.addEventListener("pointercancel", releaseEarthDrag);
-  earthCanvas.addEventListener("lostpointercapture", releaseEarthDrag);
-  earthCanvas.addEventListener("pointerleave", () => {
-    if (!dragActive) {
-      earthCanvas.style.cursor = "grab";
-    }
-  });
-  earthCanvas.addEventListener(
-    "wheel",
-    (event) => {
-      worldRotationY += event.deltaY * 0.0012;
-      worldTiltX = THREE.MathUtils.clamp(worldTiltX + event.deltaX * 0.00045, -0.2, 0.18);
-      revealEnergy = Math.min(1, revealEnergy + 0.06);
-      manualControlUntil = performance.now() + 5000;
-      autoOrbitPausedUntil = performance.now() + 5000;
-      event.preventDefault();
-    },
-    { passive: false }
-  );
-
-  const clock = new THREE.Clock();
-  const animate = () => {
-    requestAnimationFrame(animate);
-    const t = clock.getElapsedTime();
-    const nowMs = performance.now();
-    const dt = Math.min(0.06, Math.max(0.001, (nowMs - prevFrameMs) / 1000));
-    prevFrameMs = nowMs;
-    const travelActive = nowMs < themeTravelUntil;
-    const travelProgress = travelActive
-      ? THREE.MathUtils.clamp((nowMs - travelStartAt) / Math.max(travelDurationMs, 1), 0, 1)
-      : 1;
-    const travelWave = travelActive ? Math.sin(Math.PI * travelProgress) : 0;
-    const autoOrbitActive = !dragActive && nowMs > autoOrbitPausedUntil;
-    if (autoOrbitActive) {
-      orbitClock += dt;
-    }
-    if (!earthMapsApplied) {
-      applyEarthMaps();
-    }
-    if (!cloudMat.map && assets.textures.earthClouds) {
-      cloudMat.map = assets.textures.earthClouds;
-      cloudMat.opacity = 0.42;
-      cloudMat.needsUpdate = true;
-    }
-
-    worldRotationY += baseSpin + spinVelocity;
-    spinVelocity *= dragActive ? 0.9 : 0.965;
-    if (travelActive && travelToTheme !== "earth") {
-      const targetSlot = planetSystems.find((slot) => slot.key === travelToTheme);
-      if (targetSlot) {
-        const alignTarget = -(targetSlot.orbitAngle ?? targetSlot.baseAngle);
-        const diff =
-          THREE.MathUtils.euclideanModulo(alignTarget - worldRotationY + Math.PI, Math.PI * 2) -
-          Math.PI;
-        worldRotationY += diff * (0.07 + (1 - travelProgress) * 0.07);
-      }
-    } else if (!dragActive && activeTheme !== "earth" && nowMs > manualControlUntil) {
-      const activeSlot = planetSystems.find((slot) => slot.key === activeTheme);
-      if (activeSlot) {
-        const alignTarget = -(activeSlot.orbitAngle ?? activeSlot.baseAngle);
-        const diff =
-          THREE.MathUtils.euclideanModulo(alignTarget - worldRotationY + Math.PI, Math.PI * 2) -
-          Math.PI;
-        worldRotationY += diff * 0.035;
-      }
-    }
-    worldTiltX = THREE.MathUtils.clamp(worldTiltX + tiltVelocity, -0.2, 0.18);
-    tiltVelocity *= 0.92;
-    revealEnergy *= dragActive ? 0.995 : 0.982;
-    revealEnergy = Math.max(revealEnergy, 0.09);
-
-    worldRig.rotation.y = worldRotationY;
-    worldRig.rotation.x = worldTiltX;
-
-    earthMesh.rotation.y += prefersReducedMotion ? 0.00024 : 0.001;
-    cloudMesh.rotation.y += 0.0012;
-    earthGroup.rotation.z = Math.sin(t * 0.18) * 0.03;
-    const earthTargetScale = 1;
-    const earthTargetPos = tmpTarget.set(0, 0, 0);
-    earthGroup.position.lerp(earthTargetPos, 0.08);
-    earthGroup.scale.lerp(new THREE.Vector3(earthTargetScale, earthTargetScale, earthTargetScale), 0.08);
-
-    asteroidTracks.forEach((item, index) => {
-      const angle = orbitClock * item.speed + item.phase;
-      item.mesh.position.set(
-        Math.cos(angle) * item.radius,
-        item.baseY + Math.sin(orbitClock * 0.6 + item.yPhase) * 0.2,
-        Math.sin(angle) * item.radius * 0.62
-      );
-      item.mesh.rotation.x += item.spinX;
-      item.mesh.rotation.y += item.spinY;
-      if (index % 4 === 0) {
-        item.mesh.scale.setScalar(1 + Math.sin(orbitClock * 2 + item.phase) * 0.06);
-      }
-    });
-
-    moonTracks.forEach((moon, index) => {
-      const angle = orbitClock * moon.speed + moon.phase;
-      moon.mesh.position.set(
-        Math.cos(angle) * moon.radius,
-        moon.baseY + Math.sin(orbitClock * moon.wobble + index) * 0.12,
-        Math.sin(angle) * moon.radius * 0.72
-      );
-      moon.mesh.rotation.y += 0.002 + index * 0.0004;
-    });
-
-    remoteDefs.forEach((def, index) => {
-      const slot = planetSystems.find((item) => item.key === def.key);
-      if (!slot?.anchor || !slot.mesh) {
-        return;
-      }
-      const meshMat = slot.mesh.material;
-      if (def.mapKey && !meshMat.map && assets.textures[def.mapKey]) {
-        const tex = assets.textures[def.mapKey];
-        tex.colorSpace = THREE.SRGBColorSpace;
-        meshMat.map = tex;
-        meshMat.needsUpdate = true;
-      }
-      if (def.normalKey && !meshMat.normalMap && assets.textures[def.normalKey]) {
-        meshMat.normalMap = assets.textures[def.normalKey];
-        meshMat.normalScale = new THREE.Vector2(0.76, 0.76);
-        meshMat.needsUpdate = true;
-      }
-      if (autoOrbitActive) {
-        slot.orbitAngle += (def.orbitSpeed ?? 0.15) * dt;
-      }
-      const orbitAngle = slot.orbitAngle ?? slot.baseAngle;
-      slot.mesh.rotation.y += 0.003 + index * 0.001;
-      const orbitPos = new THREE.Vector3(
-        Math.sin(orbitAngle) * (def.orbitRadius || remoteOrbitRadius),
-        def.baseY + Math.sin(orbitClock * 0.7 + index * 1.5) * 0.2,
-        Math.cos(orbitAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
-      );
-      const focusBlend =
-        travelActive && activeTheme === def.key
-          ? THREE.MathUtils.smoothstep(travelProgress, 0.14, 0.86)
-          : 0;
-      const focusPos = new THREE.Vector3(
-        (def.focusX || 0) * 0.58 + Math.sin(t * 0.22 + index) * 0.08,
-        0.34 + Math.cos(t * 0.35 + index) * 0.05,
-        -4.7
-      );
-      const targetPos = orbitPos.clone().lerp(focusPos, focusBlend);
-      slot.anchor.position.lerp(targetPos, activeTheme === "earth" ? 0.05 : 0.09);
-      const relative =
-        THREE.MathUtils.euclideanModulo(worldRotationY + orbitAngle + Math.PI, Math.PI * 2) -
-        Math.PI;
-      const frontness = THREE.MathUtils.clamp(Math.cos(relative) * 0.5 + 0.5, 0, 1);
-      remoteFrontnessByTheme.set(def.key, frontness);
-      const focusBoost = activeTheme === def.key ? 0.34 : 0;
-      const opacity = THREE.MathUtils.clamp(
-        0.36 + frontness * (0.18 + revealEnergy * 0.3) + focusBoost * 0.38,
-        0.36,
-        1
-      );
-      slot.mesh.material.opacity = opacity;
-      slot.mesh.material.emissiveIntensity = 0.1 + frontness * 0.22 + focusBoost * 0.26;
-      const targetScale =
-        activeTheme === def.key
-          ? 0.62 + focusBlend * 0.24
-          : activeTheme === "earth"
-            ? 0.54 + frontness * 0.08
-            : 0.52 + frontness * 0.06;
-      const currentScale = slot.mesh.scale.x;
-      const nextScale = THREE.MathUtils.lerp(currentScale, targetScale, activeTheme === "earth" ? 0.05 : 0.08);
-      slot.mesh.scale.setScalar(nextScale);
-      if (slot.halo) {
-        slot.halo.material.opacity = 0.06 + opacity * (activeTheme === def.key ? 0.34 : 0.22);
-        slot.halo.rotation.z += 0.007 + index * 0.002;
-      }
-      if (slot.hitArea) {
-        slot.hitArea.scale.setScalar(1 + frontness * 0.2 + (activeTheme === def.key ? 0.18 : 0));
-      }
-    });
-
-    if (travelActive) {
-      flightBoost = Math.max(flightBoost, 1.08 + Math.sin(t * 28) * 0.2);
-    }
-    if (flightBoost > 0.001) {
-      flightBoost *= 0.92;
-    } else {
-      flightBoost = 0;
-    }
-
-    const targetCameraZ = 7.1 - travelWave * 1.08;
-    const targetCameraX = 0;
-    const targetCameraY = 0.08 + travelWave * 0.06;
-    camera.position.x += (targetCameraX - camera.position.x) * 0.09;
-    camera.position.y += (targetCameraY - camera.position.y) * 0.09;
-    camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
-    camera.fov += (43 + travelWave * 8.4 - camera.fov) * 0.12;
-    camera.updateProjectionMatrix();
-    cameraLookTarget.set(0, 0, 0);
-    const lookBlend =
-      travelActive && activeTheme !== "earth"
-        ? THREE.MathUtils.smoothstep(travelProgress, 0.22, 0.86) * 0.68
-        : 0;
-    if (lookBlend > 0) {
-      const focusSlot = planetSystems.find((slot) => slot.key === activeTheme);
-      if (focusSlot?.anchor) {
-        focusSlot.anchor.getWorldPosition(tmpTarget);
-        cameraLookTarget.lerp(tmpTarget, lookBlend);
-      }
-    }
-    camera.lookAt(cameraLookTarget);
-    stars.rotation.y += 0.006 + flightBoost * 0.03;
-    stars.rotation.x = Math.sin(t * 0.12) * 0.04;
-
-    renderer.render(scene, camera);
-  };
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
-
-function initOrbitPhysics() {
-  const orbitField = document.querySelector("#orbit-field");
-  const mentorNodes = [...document.querySelectorAll(".orbit-node")];
-  const mentorTitle = document.querySelector("#mentor-title");
-  const mentorCopy = document.querySelector("#mentor-copy");
-  const mentorPriority = document.querySelector("#mentor-priority");
-  if (!orbitField || mentorNodes.length === 0) {
+  const nodes = [...document.querySelectorAll("[data-type-text]")];
+  if (nodes.length === 0) {
     return;
   }
 
-  const states = mentorNodes.map((node) => ({
-    node,
-    key: node.dataset.key || "",
-    title: node.dataset.title || "",
-    copy: node.dataset.copy || "",
-    x: 0,
-    y: 0,
-    tx: 0,
-    ty: 0,
-    vx: 0,
-    vy: 0,
-    dragging: false,
-    pointerId: null,
-    holdUntil: 0,
-    moved: false,
-    startPointerX: 0,
-    startPointerY: 0
-  }));
-
-  let selectedState = states[0];
-  let rect = orbitField.getBoundingClientRect();
-  let centerX = rect.width / 2;
-  let centerY = rect.height / 2;
-
-  const nodeRadius = 49;
-
-  const resize = () => {
-    rect = orbitField.getBoundingClientRect();
-    centerX = rect.width / 2;
-    centerY = rect.height / 2;
-  };
-
-  const setPriority = (key) => {
-    if (!mentorPriority) {
+  const typeNode = (node) => {
+    if (node.dataset.typed === "1") {
       return;
     }
-    const items = [...mentorPriority.querySelectorAll("li")];
-    const selected = items.find((item) => item.dataset.key === key);
-    if (!selected) {
-      return;
-    }
-    mentorPriority.prepend(selected);
-    items.forEach((item) => item.classList.remove("is-priority"));
-    selected.classList.add("is-priority");
-  };
-
-  const activate = (state) => {
-    states.forEach((s) => s.node.classList.remove("is-active"));
-    state.node.classList.add("is-active");
-    state.node.classList.remove("is-pop");
-    void state.node.offsetWidth;
-    state.node.classList.add("is-pop");
-    if (mentorTitle) {
-      mentorTitle.textContent = state.title;
-    }
-    if (mentorCopy) {
-      mentorCopy.textContent = state.copy;
-    }
-    setPriority(state.key);
-  };
-
-  const setCentered = (state) => {
-    selectedState = state;
-    states.forEach((item) => {
-      item.node.classList.toggle("is-centered", item === selectedState);
-      if (item !== selectedState) {
-        item.holdUntil = performance.now() + 600;
-      }
-    });
-    activate(state);
-  };
-
-  const getStateByKey = (key) => states.find((state) => state.key === key);
-
-  const recalcTargets = () => {
-    const radiusBase = Math.min(rect.width, rect.height) * 0.36;
-    const outer = states.filter((state) => state !== selectedState);
-    outer.forEach((state, idx) => {
-      const angle = (-Math.PI / 2) + (idx / Math.max(outer.length, 1)) * Math.PI * 2;
-      const wave = idx % 2 === 0 ? 0 : 24;
-      const radius = radiusBase + wave;
-      state.tx = Math.cos(angle) * radius;
-      state.ty = Math.sin(angle) * radius;
-    });
-    if (selectedState) {
-      selectedState.tx = 0;
-      selectedState.ty = 0;
-    }
-  };
-
-  const clampToOrbit = (x, y) => {
-    const maxRadius = Math.min(rect.width, rect.height) * 0.5 - nodeRadius - 4;
-    const dist = Math.hypot(x, y);
-    if (dist <= maxRadius) {
-      return { x, y };
-    }
-    const ratio = maxRadius / Math.max(dist, 1e-6);
-    return {
-      x: x * ratio,
-      y: y * ratio
-    };
-  };
-
-  const applyCollisionImpulse = (active) => {
-    const now = performance.now();
-    states.forEach((other) => {
-      if (other === active) {
-        return;
-      }
-      const dx = other.x - active.x;
-      const dy = other.y - active.y;
-      const dist = Math.hypot(dx, dy);
-      const minDist = nodeRadius * 2 - 8;
-      if (dist >= minDist) {
-        return;
-      }
-      const nx = dx / Math.max(dist, 0.001);
-      const ny = dy / Math.max(dist, 0.001);
-      const overlap = minDist - dist;
-      other.x += nx * overlap * 0.56;
-      other.y += ny * overlap * 0.56;
-      const impulse = 1.28 + overlap * 0.14;
-      other.vx += nx * impulse;
-      other.vy += ny * impulse;
-      active.vx -= nx * impulse * 0.38;
-      active.vy -= ny * impulse * 0.38;
-      other.holdUntil = now + 5200;
-    });
-  };
-
-  states.forEach((state) => {
-    state.node.addEventListener("pointerdown", (event) => {
-      resize();
-      state.dragging = true;
-      state.pointerId = event.pointerId;
-      state.moved = false;
-      state.startPointerX = event.clientX;
-      state.startPointerY = event.clientY;
-      state.vx = 0;
-      state.vy = 0;
-      state.node.setPointerCapture(event.pointerId);
-      state.node.classList.add("is-dragging");
-      event.preventDefault();
-    });
-
-    state.node.addEventListener("pointermove", (event) => {
-      if (!state.dragging) {
-        return;
-      }
-      resize();
-      const px = event.clientX - rect.left - centerX;
-      const py = event.clientY - rect.top - centerY;
-      const clamped = clampToOrbit(px, py);
-      const moveVX = clamped.x - state.x;
-      const moveVY = clamped.y - state.y;
-      if (Math.abs(event.clientX - state.startPointerX) + Math.abs(event.clientY - state.startPointerY) > 6) {
-        state.moved = true;
-      }
-      state.x = clamped.x;
-      state.y = clamped.y;
-      state.vx = moveVX * 0.24;
-      state.vy = moveVY * 0.24;
-      applyCollisionImpulse(state);
-      event.preventDefault();
-    });
-
-    state.node.addEventListener("pointerup", () => {
-      if (!state.dragging) {
-        return;
-      }
-      state.dragging = false;
-      state.node.classList.remove("is-dragging");
-      if (state.pointerId !== null && state.node.hasPointerCapture(state.pointerId)) {
-        state.node.releasePointerCapture(state.pointerId);
-      }
-      state.pointerId = null;
-      if (!state.moved) {
-        setCentered(state);
+    const text = node.dataset.typeText || node.textContent || "";
+    node.dataset.typed = "1";
+    node.textContent = "";
+    node.classList.add("is-typing");
+    let i = 0;
+    const step = () => {
+      i += 1;
+      node.textContent = text.slice(0, i);
+      if (i < text.length) {
+        setTimeout(step, 18);
       } else {
-        activate(state);
-        state.holdUntil = performance.now() + 5000;
+        node.classList.remove("is-typing");
       }
-    });
-    state.node.addEventListener("pointercancel", () => {
-      if (state.pointerId !== null && state.node.hasPointerCapture(state.pointerId)) {
-        state.node.releasePointerCapture(state.pointerId);
-      }
-      state.pointerId = null;
-      state.dragging = false;
-      state.node.classList.remove("is-dragging");
-    });
-  });
-
-  if (mentorPriority) {
-    mentorPriority.addEventListener("click", (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
-      const item = target.closest("li");
-      if (!item) {
-        return;
-      }
-      const key = item.dataset.key || "";
-      const state = getStateByKey(key);
-      if (!state) {
-        return;
-      }
-      setCentered(state);
-    });
-  }
-
-  setCentered(states[0]);
-  resize();
-  recalcTargets();
-
-  const loop = () => {
-    requestAnimationFrame(loop);
-    const now = performance.now();
-    recalcTargets();
-
-    states.forEach((state) => {
-      if (!state.dragging) {
-        const restoring =
-          state === selectedState
-            ? 0.16
-            : now > state.holdUntil
-              ? 0.08
-              : 0.02;
-        const damping = state === selectedState ? 0.82 : 0.9;
-        state.vx += (state.tx - state.x) * restoring;
-        state.vy += (state.ty - state.y) * restoring;
-        state.vx *= damping;
-        state.vy *= damping;
-        state.x += state.vx;
-        state.y += state.vy;
-        if (state === selectedState) {
-          state.x *= 0.74;
-          state.y *= 0.74;
-          state.vx *= 0.72;
-          state.vy *= 0.72;
-        }
-        const clamped = clampToOrbit(state.x, state.y);
-        state.x = clamped.x;
-        state.y = clamped.y;
-      } else if (state === selectedState) {
-        selectedState = state;
-      }
-
-      state.node.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
-    });
+    };
+    step();
   };
-  loop();
 
-  window.addEventListener("resize", resize);
-}
-
-function initCodeTyping() {
-  const codeSection = document.querySelector("#code");
-  const liveCodeNode = document.querySelector("#live-code");
-  const codePulseNodes = [...document.querySelectorAll("#code-pulses span")];
-  if (!liveCodeNode || !codeSection) {
+  if (!("IntersectionObserver" in window)) {
+    nodes.forEach(typeNode);
     return;
   }
-  liveCodeNode.textContent = "const mission = buildProduct({ value: true, trust: true });";
 
-  const snippets = [
-    {
-      code: [
-        "$ strategy map --goal=grant-platform",
-        "$ define roles --experts --authors --participants",
-        "$ launch sprint --team=core --status=green"
-      ]
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        typeNode(entry.target);
+        obs.unobserve(entry.target);
+      });
     },
-    {
-      code: [
-        "$ architect stack --framework=fit-to-task",
-        "$ run mentor-review --scope=critical-flow",
-        "$ release product --quality=production-ready"
-      ]
-    },
-    {
-      code: [
-        "$ automate ops --reports --content --delivery",
-        "$ sync marketing --tg --dzen --youtube",
-        "$ measure impact --business --team --users"
-      ]
-    }
-  ];
+    { threshold: 0.45, rootMargin: "0px 0px -8% 0px" }
+  );
 
-  let snippetIndex = 0;
-  let charIndex = 0;
-  let mode = "typing";
-  let typingStarted = false;
-
-  const tick = () => {
-    const snippet = snippets[snippetIndex];
-    const text = snippet.code.join("\n");
-    if (mode === "typing") {
-      charIndex += 2;
-      liveCodeNode.textContent = text.slice(0, charIndex);
-      if (charIndex >= text.length) {
-        mode = "pause";
-        codePulseNodes.forEach((node, index) => {
-          node.style.animationDelay = `${index * 0.08}s`;
-        });
-      }
-      setTimeout(tick, 18);
-      return;
-    }
-    if (mode === "pause") {
-      mode = "deleting";
-      setTimeout(tick, 700);
-      return;
-    }
-    charIndex -= 4;
-    liveCodeNode.textContent = text.slice(0, Math.max(0, charIndex));
-    if (charIndex <= 0) {
-      mode = "typing";
-      snippetIndex = (snippetIndex + 1) % snippets.length;
-    }
-    setTimeout(tick, 16);
-  };
-
-  const startTyping = () => {
-    if (typingStarted) {
-      return;
-    }
-    typingStarted = true;
-    charIndex = 0;
-    mode = "typing";
-    liveCodeNode.textContent = "";
-    tick();
-  };
-
-  if ("IntersectionObserver" in window) {
-    const codeObserver = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) {
-            return;
-          }
-          startTyping();
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.35, rootMargin: "0px 0px -10% 0px" }
-    );
-    codeObserver.observe(codeSection);
-  } else {
-    startTyping();
-  }
+  nodes.forEach((node) => observer.observe(node));
 }
 
 function initProjectShowcase() {
@@ -1580,46 +118,41 @@ function initProjectShowcase() {
     grantflow: {
       title: "Разработал площадку для молодёжных проектов при грантовой поддержке",
       summary:
-        "Ключевая ценность проекта: молодой автор быстрее переходит от идеи к команде и реализации, а не остаётся один на один с замыслом.",
+        "Проект дал молодым командам понятный вход в реализацию: от идеи и подбора участников до обратной связи экспертов и перехода в рабочий продукт.",
       points: [
-        "Снизил порог входа в проектную среду: публикация идеи, поиск команды и запуск работы в одном месте.",
-        "Добавил раннюю экспертную обратную связь, чтобы слабые гипотезы отсеивались до затрат на разработку.",
-        "Открыл возможности не только IT-командам: инженерные, социальные и образовательные инициативы получили единый вход."
+        "Снизил порог входа: не нужно искать менторов и команду по разным площадкам.",
+        "Собрал единый контур для движения инициатив к грантовой поддержке и практическому запуску.",
+        "Помог молодым авторам быстрее превращать замысел в проект с реальной ценностью для людей."
       ],
       impact:
-        "Польза: больше молодёжных инициатив доходят до реальной реализации и получают шанс на рост через грантовую экосистему."
+        "Польза: молодёжные инициативы получают не только идею, а рабочий путь к результату и развитию через грантовую экосистему."
     },
     mentorops: {
-      title: "MentorOps — система управления менторским контуром",
+      title: "MentorOps — управляемая система работы менторов и команды",
       summary:
-        "Операционный сервис для синхронизации менторов, ассистентов и команды разработки: задачи, стандарты, ревью, контроль качества и прозрачный delivery.",
+        "Оркестрация задач, ревью и синхронизации менторского контура, чтобы сложные проекты выходили в релиз без хаоса и потери качества.",
       points: [
-        "Выстроены роли, регламенты и единый цикл работы.",
-        "Автоматизированы рутины по отчётности и сопровождению команды.",
-        "Стабилизирован ритм релизов и управляемость сложных задач."
+        "Выстроил прозрачный ритм работы менторов, ассистентов и разработки.",
+        "Сократил потери на ручной координации и повторных согласованиях.",
+        "Усилил качество решения за счёт системного ревью в критичных точках."
       ],
-      impact:
-        "Польза: команда работает предсказуемо, руководитель видит картину целиком, а качество растёт без хаоса."
+      impact: "Польза: бизнес получает предсказуемый delivery и более сильный конечный продукт."
     },
     media: {
-      title: "Media Growth Lab — контент и маркетинг вокруг продукта",
+      title: "Media Growth Lab — рост продукта через контент и маркетинг",
       summary:
-        "Интеграция каналов Telegram, Дзен и YouTube в единую воронку внимания с опорой на аналитику, эксперименты и автоматизацию процессов.",
+        "Связал продукт, контент и рекламные активности в единую систему: Telegram, Дзен и YouTube работают как контур доверия и роста.",
       points: [
-        "Разработаны контент-сценарии для разных стадий воронки.",
-        "Связаны маркетинг, продукт и команда в один цикл гипотез.",
-        "Настроен контроль эффективности по метрикам, а не по ощущениям."
+        "Собрал процесс производства контента с чёткой бизнес-целью, а не ради охватов.",
+        "Запустил цикл гипотез и экспериментов с аналитикой результата.",
+        "Автоматизировал рутину, чтобы команда фокусировалась на ценности."
       ],
-      impact:
-        "Польза: продукт получает устойчивый охват, доверие аудитории и системный рост, а не разовые всплески."
+      impact: "Польза: устойчивый рост внимания и конверсии вместо разовых всплесков."
     }
   };
 
   const setProject = (key) => {
-    const data = projects[key];
-    if (!data) {
-      return;
-    }
+    const data = projects[key] || projects.grantflow;
     chipNodes.forEach((chip) => {
       chip.classList.toggle("is-active", chip.dataset.project === key);
     });
@@ -1643,99 +176,79 @@ function initProjectShowcase() {
   setProject("grantflow");
 }
 
-function initTerminalStream() {
-  if (isMobileViewport) {
+function initCodeTyping() {
+  const codeNode = document.querySelector("#live-code");
+  if (!codeNode) {
     return;
   }
-  const terminalNode = document.querySelector("#terminal-stream");
-  if (!terminalNode) {
-    return;
-  }
-  const pool = [
-    "boot::mentor feedback loop active",
-    "client_goal::convert to measurable UX outcome",
-    "render::motion tuned for trust",
-    "api_core::stability checks passed",
-    "release::production channel green",
-    "tracking::engagement curve rising",
-    "architecture::scale-ready foundation set",
-    "qa::critical path secured"
+
+  const snippets = [
+    [
+      "$ discovery.run --case=grantflow",
+      "$ role-map.build --experts --authors --team",
+      "$ product.scope --value=high --risk=controlled"
+    ],
+    [
+      "$ architecture.review --mentor-loop=enabled",
+      "$ delivery.sync --team=core --priority=business",
+      "$ release.prepare --quality=production-ready"
+    ],
+    [
+      "$ growth.system --content --marketing --automation",
+      "$ ai.assist --mode=review-first",
+      "$ report.publish --impact --next-steps"
+    ]
   ];
-  const lines = [];
-  const cap = () => Math.max(120, Math.floor(window.innerHeight / 14) + 100);
-  let maxLines = cap();
 
-  const push = () => {
-    const stamp = new Date().toLocaleTimeString("ru-RU", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
-    const text = pool[Math.floor(Math.random() * pool.length)];
-    lines.push(`[${stamp}] $ ${text}`);
-    while (lines.length > maxLines) {
-      lines.shift();
-    }
-  };
-  for (let i = 0; i < maxLines; i += 1) {
-    push();
-  }
-  terminalNode.textContent = lines.join("\n");
-  setInterval(() => {
-    push();
-    terminalNode.textContent = lines.join("\n");
-  }, prefersReducedMotion ? 480 : 170);
-  window.addEventListener("resize", () => {
-    maxLines = cap();
-  });
-}
+  let snippetIndex = 0;
+  let charIndex = 0;
+  let mode = "typing";
+  let started = false;
 
-function initRouteProgress() {
-  const routeSection = document.querySelector(".scene--route");
-  const progressBar = document.querySelector("#route-progress-bar");
-  if (!routeSection || !progressBar) {
-    return;
-  }
-  const update = () => {
-    const rect = routeSection.getBoundingClientRect();
-    const viewport = window.innerHeight || 1;
-    const start = viewport * 0.92;
-    const end = -rect.height * 0.28;
-    const value = (start - rect.top) / Math.max(start - end, 1);
-    const clamped = THREE.MathUtils.clamp(value, 0, 1);
-    progressBar.style.width = `${12 + clamped * 88}%`;
-  };
-  update();
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
-}
-
-function initTypeOnView() {
-  const nodes = [...document.querySelectorAll("[data-type-text]")];
-  if (nodes.length === 0 || prefersReducedMotion) {
-    return;
-  }
-
-  const runTyping = (node) => {
-    if (node.dataset.typed === "1") {
+  const tick = () => {
+    const text = snippets[snippetIndex].join("\n");
+    if (mode === "typing") {
+      charIndex += 2;
+      codeNode.textContent = text.slice(0, charIndex);
+      if (charIndex >= text.length) {
+        mode = "pause";
+      }
+      setTimeout(tick, 18);
       return;
     }
-    const text = node.dataset.typeText || node.textContent || "";
-    node.dataset.typed = "1";
-    node.classList.add("is-typing");
-    node.textContent = "";
-    let i = 0;
-    const step = () => {
-      i += 1;
-      node.textContent = text.slice(0, i);
-      if (i < text.length) {
-        setTimeout(step, 20);
-      } else {
-        node.classList.remove("is-typing");
-      }
-    };
-    step();
+    if (mode === "pause") {
+      mode = "erase";
+      setTimeout(tick, 780);
+      return;
+    }
+    charIndex -= 4;
+    codeNode.textContent = text.slice(0, Math.max(0, charIndex));
+    if (charIndex <= 0) {
+      mode = "typing";
+      snippetIndex = (snippetIndex + 1) % snippets.length;
+    }
+    setTimeout(tick, 16);
   };
+
+  const start = () => {
+    if (started) {
+      return;
+    }
+    started = true;
+    codeNode.textContent = "";
+    tick();
+  };
+
+  if (!("IntersectionObserver" in window)) {
+    start();
+    return;
+  }
+
+  const section = codeNode.closest(".panel");
+  if (!section) {
+    start();
+    return;
+  }
 
   const observer = new IntersectionObserver(
     (entries, obs) => {
@@ -1743,72 +256,966 @@ function initTypeOnView() {
         if (!entry.isIntersecting) {
           return;
         }
-        runTyping(entry.target);
+        start();
         obs.unobserve(entry.target);
       });
     },
-    { threshold: 0.45, rootMargin: "0px 0px -8% 0px" }
+    { threshold: 0.35, rootMargin: "0px 0px -10% 0px" }
   );
 
-  nodes.forEach((node) => {
-    observer.observe(node);
-  });
-}
-
-function initMagneticButtons() {
-  const magneticNodes = [...document.querySelectorAll(".magnetic")];
-  magneticNodes.forEach((node) => {
-    node.addEventListener("pointermove", (event) => {
-      const bounds = node.getBoundingClientRect();
-      const x = event.clientX - bounds.left - bounds.width / 2;
-      const y = event.clientY - bounds.top - bounds.height / 2;
-      node.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
-    });
-    node.addEventListener("pointerleave", () => {
-      node.style.transform = "";
-    });
-  });
+  observer.observe(section);
 }
 
 function initPointerGlow() {
-  let pointerX = window.innerWidth * 0.5;
-  let pointerY = window.innerHeight * 0.5;
-  let rafId = null;
   const root = document.documentElement;
-  const update = () => {
-    root.style.setProperty("--mx", `${pointerX}px`);
-    root.style.setProperty("--my", `${pointerY}px`);
-    rafId = null;
+  let raf = null;
+  let x = window.innerWidth * 0.5;
+  let y = window.innerHeight * 0.5;
+
+  const draw = () => {
+    root.style.setProperty("--mx", `${x}px`);
+    root.style.setProperty("--my", `${y}px`);
+    raf = null;
   };
+
   window.addEventListener("pointermove", (event) => {
-    pointerX = event.clientX;
-    pointerY = event.clientY;
-    if (!rafId) {
-      rafId = requestAnimationFrame(update);
+    x = event.clientX;
+    y = event.clientY;
+    if (!raf) {
+      raf = requestAnimationFrame(draw);
     }
   });
 }
 
-function initHeavyScenes() {
-  if (heavyScenesInitialized) {
+function initMentorOrbit() {
+  const field = document.querySelector("#orbit-field");
+  const nodes = [...document.querySelectorAll(".orbit-node")];
+  const titleNode = document.querySelector("#mentor-focus-title");
+  const copyNode = document.querySelector("#mentor-focus-copy");
+
+  if (!field || nodes.length === 0) {
     return;
   }
-  heavyScenesInitialized = true;
-  try {
-    initEarthScene();
-  } catch (error) {
-    console.error("Earth scene init failed:", error);
-    document.body.classList.add("earth-fallback");
-  }
-  applyTheme("earth");
+
+  const states = nodes.map((node) => ({
+    node,
+    title: node.dataset.title || "",
+    copy: node.dataset.copy || "",
+    x: 0,
+    y: 0,
+    tx: 0,
+    ty: 0,
+    vx: 0,
+    vy: 0,
+    dragging: false,
+    moved: false,
+    pointerId: null,
+    holdUntil: 0,
+    startX: 0,
+    startY: 0
+  }));
+
+  let selected = states[0];
+  let rect = field.getBoundingClientRect();
+
+  const nodeRadius = () => (rect.width < 430 ? 42 : 51);
+
+  const resize = () => {
+    rect = field.getBoundingClientRect();
+  };
+
+  const clamp = (x, y) => {
+    const max = Math.min(rect.width, rect.height) * 0.5 - nodeRadius() - 4;
+    const dist = Math.hypot(x, y);
+    if (dist <= max) {
+      return { x, y };
+    }
+    const k = max / Math.max(dist, 1e-6);
+    return { x: x * k, y: y * k };
+  };
+
+  const setActive = (state) => {
+    selected = state;
+    states.forEach((item) => {
+      item.node.classList.toggle("is-active", item === state);
+      if (item !== state) {
+        item.holdUntil = performance.now() + 600;
+      }
+    });
+    if (titleNode) {
+      titleNode.textContent = `Фокус: ${state.title}`;
+    }
+    if (copyNode) {
+      copyNode.textContent = state.copy;
+    }
+  };
+
+  const recalcTargets = () => {
+    const outer = states.filter((state) => state !== selected);
+    const ring = Math.min(rect.width, rect.height) * 0.36;
+    outer.forEach((state, index) => {
+      const angle = -Math.PI / 2 + (index / Math.max(outer.length, 1)) * Math.PI * 2;
+      state.tx = Math.cos(angle) * ring;
+      state.ty = Math.sin(angle) * ring;
+    });
+    selected.tx = 0;
+    selected.ty = 0;
+  };
+
+  const applyCollisions = (active) => {
+    const now = performance.now();
+    const minDist = nodeRadius() * 1.9;
+    states.forEach((other) => {
+      if (other === active) {
+        return;
+      }
+      const dx = other.x - active.x;
+      const dy = other.y - active.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist >= minDist) {
+        return;
+      }
+      const nx = dx / Math.max(dist, 0.001);
+      const ny = dy / Math.max(dist, 0.001);
+      const overlap = minDist - dist;
+      other.x += nx * overlap * 0.62;
+      other.y += ny * overlap * 0.62;
+      other.vx += nx * (0.7 + overlap * 0.05);
+      other.vy += ny * (0.7 + overlap * 0.05);
+      other.holdUntil = now + 5000;
+    });
+  };
+
+  states.forEach((state) => {
+    state.node.addEventListener("pointerdown", (event) => {
+      resize();
+      state.dragging = true;
+      state.moved = false;
+      state.pointerId = event.pointerId;
+      state.startX = event.clientX;
+      state.startY = event.clientY;
+      state.vx = 0;
+      state.vy = 0;
+      state.node.classList.add("is-dragging");
+      state.node.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    state.node.addEventListener("pointermove", (event) => {
+      if (!state.dragging) {
+        return;
+      }
+      const dx = event.clientX - state.startX;
+      const dy = event.clientY - state.startY;
+      if (Math.abs(dx) + Math.abs(dy) > 6) {
+        state.moved = true;
+      }
+      const px = event.clientX - rect.left - rect.width / 2;
+      const py = event.clientY - rect.top - rect.height / 2;
+      const clamped = clamp(px, py);
+      state.vx = (clamped.x - state.x) * 0.28;
+      state.vy = (clamped.y - state.y) * 0.28;
+      state.x = clamped.x;
+      state.y = clamped.y;
+      applyCollisions(state);
+      event.preventDefault();
+    });
+
+    const release = () => {
+      if (!state.dragging) {
+        return;
+      }
+      state.dragging = false;
+      state.node.classList.remove("is-dragging");
+      if (state.pointerId !== null && state.node.hasPointerCapture(state.pointerId)) {
+        state.node.releasePointerCapture(state.pointerId);
+      }
+      state.pointerId = null;
+
+      if (!state.moved) {
+        setActive(state);
+      } else {
+        state.holdUntil = performance.now() + 5000;
+      }
+    };
+
+    state.node.addEventListener("pointerup", release);
+    state.node.addEventListener("pointercancel", release);
+  });
+
+  setActive(states[0]);
+  recalcTargets();
+
+  const loop = () => {
+    requestAnimationFrame(loop);
+    resize();
+    recalcTargets();
+    const now = performance.now();
+
+    states.forEach((state) => {
+      if (!state.dragging) {
+        const toCenter = state === selected;
+        const spring = toCenter ? 0.18 : now > state.holdUntil ? 0.1 : 0.02;
+        const damping = toCenter ? 0.72 : 0.9;
+        state.vx += (state.tx - state.x) * spring;
+        state.vy += (state.ty - state.y) * spring;
+        state.vx *= damping;
+        state.vy *= damping;
+        state.x += state.vx;
+        state.y += state.vy;
+        const clamped = clamp(state.x, state.y);
+        state.x = clamped.x;
+        state.y = clamped.y;
+      }
+      state.node.style.setProperty("--x", `${state.x}px`);
+      state.node.style.setProperty("--y", `${state.y}px`);
+    });
+  };
+
+  loop();
+  window.addEventListener("resize", resize);
+}
+const gltfLoader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
+
+const assetUrls = {
+  rocket: "./assets/PrimaryIonDrive.glb",
+  earthMap: "./assets/textures/earth_atmos_2048.jpg",
+  earthNormal: "./assets/textures/earth_normal_2048.jpg",
+  earthSpecular: "./assets/textures/earth_specular_2048.jpg",
+  earthClouds: "./assets/textures/earth_clouds_1024.png",
+  moonMap: "./assets/textures/moon_1024.jpg",
+  neptuneMap: "./assets/textures/2k_neptune.jpg",
+  saturnMap: "./assets/textures/2k_saturn.jpg",
+  jupiterMap: "./assets/textures/2k_jupiter.jpg"
+};
+
+const assets = {
+  rocket: null,
+  textures: {}
+};
+
+function loadTexture(url) {
+  return new Promise((resolve) => {
+    textureLoader.load(
+      url,
+      (texture) => resolve(texture),
+      undefined,
+      () => resolve(null)
+    );
+  });
 }
 
-initPointerGlow();
-initMagneticButtons();
-initTerminalStream();
-initCodeTyping();
-initProjectShowcase();
-initTypeOnView();
-initRouteProgress();
-initOrbitPhysics();
-initPreloaderScene();
+function loadRocket(url) {
+  return new Promise((resolve) => {
+    gltfLoader.load(
+      url,
+      (gltf) => resolve(gltf),
+      undefined,
+      () => resolve(null)
+    );
+  });
+}
+
+const preloaderNode = document.querySelector("#preloader");
+const preloaderStatusNode = document.querySelector("#preloader-status");
+const preloaderFillNode = document.querySelector("#preloader-meter-fill");
+const preloaderCanvas = document.querySelector("#preloader-canvas");
+
+const loadMessages = [
+  "Открываю стартовый коридор...",
+  "Поднимаю космическую сцену...",
+  "Калибрую планетарные системы...",
+  "Синхронизирую визуальные контуры...",
+  "Финишная подготовка..."
+];
+
+function initPreloaderScene() {
+  if (!preloaderCanvas) {
+    return () => {};
+  }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 120);
+  camera.position.set(0, 0.05, 8);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: preloaderCanvas,
+    antialias: true,
+    alpha: true
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const ambient = new THREE.AmbientLight(0x7da0d8, 0.8);
+  const key = new THREE.DirectionalLight(0xffffff, 1.18);
+  key.position.set(4.5, 2.2, 5);
+  scene.add(ambient, key);
+
+  const starsGeometry = new THREE.BufferGeometry();
+  const starCount = 1200;
+  const positions = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i += 1) {
+    const i3 = i * 3;
+    positions[i3] = (Math.random() - 0.5) * 120;
+    positions[i3 + 1] = (Math.random() - 0.5) * 70;
+    positions[i3 + 2] = (Math.random() - 0.5) * 100;
+  }
+  starsGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  const stars = new THREE.Points(
+    starsGeometry,
+    new THREE.PointsMaterial({
+      color: 0xa8d1ff,
+      size: 0.1,
+      transparent: true,
+      opacity: 0.62
+    })
+  );
+  scene.add(stars);
+
+  const placeholder = new THREE.Mesh(
+    new THREE.ConeGeometry(0.24, 1.3, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0x89bbff,
+      roughness: 0.4,
+      metalness: 0.38
+    })
+  );
+  placeholder.rotation.z = Math.PI * 0.5;
+  scene.add(placeholder);
+
+  let rocketScene = null;
+  if (assets.rocket?.scene) {
+    rocketScene = assets.rocket.scene.clone(true);
+    rocketScene.scale.setScalar(0.48);
+    rocketScene.rotation.set(0.12, Math.PI * 0.5, -0.18);
+    scene.add(rocketScene);
+    scene.remove(placeholder);
+  }
+
+  const actor = () => rocketScene || placeholder;
+  const clock = new THREE.Clock();
+  let stopped = false;
+
+  const animate = () => {
+    if (stopped) {
+      return;
+    }
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+    stars.rotation.y = elapsed * 0.03;
+
+    const ship = actor();
+    if (ship) {
+      const t = (elapsed % 2.4) / 2.4;
+      ship.position.x = -6 + t * 12;
+      ship.position.y = -0.08 + Math.sin(elapsed * 3.2) * 0.1;
+      ship.position.z = 1.8 - t * 4.6;
+      ship.rotation.y = Math.PI * 0.5 + t * 0.2;
+      ship.rotation.z = -0.18 + t * 0.26;
+    }
+
+    renderer.render(scene, camera);
+  };
+
+  animate();
+
+  const onResize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  };
+  window.addEventListener("resize", onResize);
+
+  return () => {
+    stopped = true;
+    window.removeEventListener("resize", onResize);
+    renderer.dispose();
+  };
+}
+
+let preloaderHidden = false;
+function hidePreloader() {
+  if (preloaderHidden) {
+    return;
+  }
+  preloaderHidden = true;
+  document.body.classList.remove("show-preloader");
+  if (preloaderNode) {
+    preloaderNode.classList.add("is-hidden");
+  }
+}
+
+function setPreloaderProgress(done, total) {
+  const ratio = total > 0 ? done / total : 1;
+  const progress = Math.max(12, Math.min(100, Math.round(ratio * 100)));
+  if (preloaderFillNode) {
+    preloaderFillNode.style.width = `${progress}%`;
+  }
+  if (preloaderStatusNode) {
+    const index = Math.min(loadMessages.length - 1, Math.floor(ratio * loadMessages.length));
+    preloaderStatusNode.textContent = loadMessages[index] || loadMessages[loadMessages.length - 1];
+  }
+}
+
+function triggerFlightOverlay(themeKey) {
+  const overlay = document.querySelector("#flight-overlay");
+  if (!overlay) {
+    return;
+  }
+  const status = document.querySelector("#flight-status");
+  if (status && themeMap[themeKey]) {
+    status.textContent = `Гиперпереход: ${themeMap[themeKey].label}`;
+  }
+  overlay.classList.remove("is-active");
+  void overlay.offsetWidth;
+  overlay.classList.add("is-active");
+  const timeout = prefersReducedMotion ? 420 : 980;
+  window.setTimeout(() => {
+    overlay.classList.remove("is-active");
+  }, timeout);
+}
+
+function initWorldScene() {
+  const canvas = document.querySelector("#earth-canvas");
+  if (!canvas) {
+    return;
+  }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(43, window.innerWidth / window.innerHeight, 0.1, 260);
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const ambient = new THREE.AmbientLight(0x6f9ad1, 0.72);
+  const key = new THREE.DirectionalLight(0xffffff, 1.16);
+  key.position.set(5.8, 3.2, 4.6);
+  const rim = new THREE.DirectionalLight(0x79bfff, 0.48);
+  rim.position.set(-5.4, -1.5, -4.6);
+  scene.add(ambient, key, rim);
+
+  const starsGeometry = new THREE.BufferGeometry();
+  const starsCount = 1700;
+  const starPositions = new Float32Array(starsCount * 3);
+  for (let i = 0; i < starsCount; i += 1) {
+    const i3 = i * 3;
+    starPositions[i3] = (Math.random() - 0.5) * 190;
+    starPositions[i3 + 1] = (Math.random() - 0.5) * 130;
+    starPositions[i3 + 2] = (Math.random() - 0.5) * 170;
+  }
+  starsGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+  const stars = new THREE.Points(
+    starsGeometry,
+    new THREE.PointsMaterial({
+      color: 0xaed3ff,
+      size: 0.11,
+      transparent: true,
+      opacity: 0.56
+    })
+  );
+  scene.add(stars);
+
+  const root = new THREE.Group();
+  scene.add(root);
+
+  const earthMat = new THREE.MeshPhongMaterial({
+    color: 0x4f84d7,
+    shininess: 26,
+    specular: new THREE.Color(0x2f4f85)
+  });
+  if (assets.textures.earthMap) {
+    assets.textures.earthMap.colorSpace = THREE.SRGBColorSpace;
+    earthMat.map = assets.textures.earthMap;
+  }
+  if (assets.textures.earthNormal) {
+    earthMat.normalMap = assets.textures.earthNormal;
+    earthMat.normalScale = new THREE.Vector2(0.95, 0.95);
+  }
+  if (assets.textures.earthSpecular) {
+    earthMat.specularMap = assets.textures.earthSpecular;
+  }
+
+  const earthAnchor = new THREE.Group();
+  root.add(earthAnchor);
+
+  const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(1.95, 120, 120), earthMat);
+  earthAnchor.add(earthMesh);
+
+  const cloudMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(2.01, 100, 100),
+    new THREE.MeshPhongMaterial({
+      map: assets.textures.earthClouds || null,
+      transparent: true,
+      opacity: assets.textures.earthClouds ? 0.36 : 0,
+      depthWrite: false
+    })
+  );
+  earthAnchor.add(cloudMesh);
+
+  const atmosphere = new THREE.Mesh(
+    new THREE.SphereGeometry(2.18, 64, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x7ab9ff,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.BackSide
+    })
+  );
+  earthAnchor.add(atmosphere);
+
+  const earthHit = new THREE.Mesh(
+    new THREE.SphereGeometry(2.3, 24, 24),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.001, depthWrite: false })
+  );
+  earthHit.userData.themeKey = "earth";
+  earthAnchor.add(earthHit);
+
+  const moon = new THREE.Mesh(
+    new THREE.SphereGeometry(0.24, 32, 32),
+    new THREE.MeshStandardMaterial({
+      map: assets.textures.moonMap || null,
+      color: 0xa5b8cb,
+      roughness: 0.9,
+      metalness: 0.04
+    })
+  );
+  moon.position.set(3.05, 0.42, -0.55);
+  root.add(moon);
+  const createPlanet = ({ radius, map, color, roughness, metalness }) => {
+    if (map) {
+      map.colorSpace = THREE.SRGBColorSpace;
+    }
+    return new THREE.Mesh(
+      new THREE.SphereGeometry(radius, 80, 80),
+      new THREE.MeshStandardMaterial({
+        map: map || null,
+        color,
+        roughness,
+        metalness
+      })
+    );
+  };
+
+  const neonAnchor = new THREE.Group();
+  const neonMesh = createPlanet({
+    radius: 0.82,
+    map: assets.textures.neptuneMap || assets.textures.jupiterMap,
+    color: 0x6fc8ff,
+    roughness: 0.74,
+    metalness: 0.06
+  });
+  neonAnchor.add(neonMesh);
+  const neonHit = new THREE.Mesh(
+    new THREE.SphereGeometry(1.16, 24, 24),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.001, depthWrite: false })
+  );
+  neonHit.userData.themeKey = "neon";
+  neonAnchor.add(neonHit);
+
+  const emberAnchor = new THREE.Group();
+  const emberMesh = createPlanet({
+    radius: 0.9,
+    map: assets.textures.saturnMap || assets.textures.jupiterMap,
+    color: 0xffbb84,
+    roughness: 0.68,
+    metalness: 0.1
+  });
+  emberAnchor.add(emberMesh);
+  const emberHit = new THREE.Mesh(
+    new THREE.SphereGeometry(1.2, 24, 24),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.001, depthWrite: false })
+  );
+  emberHit.userData.themeKey = "ember";
+  emberAnchor.add(emberHit);
+
+  root.add(neonAnchor, emberAnchor);
+
+  const rings = [];
+  for (let i = 0; i < 18; i += 1) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(4.8 + i * 0.075, 0.004, 8, 220),
+      new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x6ca6f1 : 0x7fc9ff,
+        transparent: true,
+        opacity: i % 3 === 0 ? 0.1 : 0.05,
+        depthWrite: false
+      })
+    );
+    ring.rotation.x = Math.PI / 2.05;
+    ring.rotation.y = 0.06;
+    root.add(ring);
+    rings.push(ring);
+  }
+
+  const asteroids = [];
+  const asteroidCount = 34;
+  const asteroidGeometry = new THREE.IcosahedronGeometry(0.08, 0);
+  for (let i = 0; i < asteroidCount; i += 1) {
+    const mesh = new THREE.Mesh(
+      asteroidGeometry,
+      new THREE.MeshStandardMaterial({
+        color: 0x8ea6c1,
+        roughness: 0.78,
+        metalness: 0.04,
+        transparent: true,
+        opacity: 0.6
+      })
+    );
+    mesh.position.set(
+      (Math.random() - 0.5) * 26,
+      (Math.random() - 0.5) * 8,
+      -4 + Math.random() * 10
+    );
+    mesh.userData.spin = (Math.random() - 0.5) * 0.7;
+    scene.add(mesh);
+    asteroids.push(mesh);
+  }
+
+  const systems = {
+    earth: { key: "earth", anchor: earthAnchor, mesh: earthMesh, angle: 0, speed: 0, radius: 0, yAmp: 0, baseY: 0, scale: 1 },
+    neon: { key: "neon", anchor: neonAnchor, mesh: neonMesh, angle: 2.12, speed: 0.14, radius: 6, yAmp: 0.44, baseY: 0.72, scale: 0.86 },
+    ember: { key: "ember", anchor: emberAnchor, mesh: emberMesh, angle: 5.18, speed: 0.09, radius: 7.15, yAmp: 0.5, baseY: -0.58, scale: 0.88 }
+  };
+
+  const flight = {
+    active: false,
+    start: 0,
+    duration: prefersReducedMotion ? 680 : 1550,
+    from: "earth",
+    to: "earth"
+  };
+
+  const interaction = {
+    dragging: false,
+    pointerId: null,
+    moved: false,
+    lastX: 0,
+    lastY: 0,
+    rotateX: 0.06,
+    rotateY: 0,
+    autoYaw: 0,
+    lastUserInputAt: performance.now()
+  };
+
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+
+  let cameraLook = new THREE.Vector3(0, 0, 0);
+  let cameraPos = new THREE.Vector3(0, 0.18, 7.2);
+  camera.position.copy(cameraPos);
+  camera.lookAt(cameraLook);
+
+  const getPlanetPosition = (key) => {
+    const anchor = systems[key]?.anchor;
+    if (!anchor) {
+      return new THREE.Vector3();
+    }
+    const out = new THREE.Vector3();
+    anchor.getWorldPosition(out);
+    return out;
+  };
+
+  const switchTheme = (key) => {
+    if (!themeMap[key] || key === currentTheme) {
+      return;
+    }
+    flight.active = true;
+    flight.start = performance.now();
+    flight.from = currentTheme;
+    flight.to = key;
+    triggerFlightOverlay(key);
+  };
+
+  const updateOrbits = (delta, orbitEnabled) => {
+    [systems.neon, systems.ember].forEach((planet) => {
+      if (orbitEnabled) {
+        planet.angle += delta * planet.speed;
+      }
+      const x = Math.cos(planet.angle) * planet.radius;
+      const z = Math.sin(planet.angle) * planet.radius * 0.86;
+      const y = planet.baseY + Math.sin(planet.angle * 0.76) * planet.yAmp;
+      planet.anchor.position.set(x, y, z);
+    });
+
+    moon.position.x = Math.cos(performance.now() * 0.00018) * 3.05;
+    moon.position.z = Math.sin(performance.now() * 0.00018) * 2.2;
+    moon.position.y = 0.35 + Math.sin(performance.now() * 0.00011) * 0.22;
+  };
+
+  const pointerToNdc = (event) => {
+    const canvasRect = canvas.getBoundingClientRect();
+    pointer.x = ((event.clientX - canvasRect.left) / canvasRect.width) * 2 - 1;
+    pointer.y = -((event.clientY - canvasRect.top) / canvasRect.height) * 2 + 1;
+  };
+
+  canvas.addEventListener("pointerdown", (event) => {
+    interaction.dragging = true;
+    interaction.pointerId = event.pointerId;
+    interaction.moved = false;
+    interaction.lastX = event.clientX;
+    interaction.lastY = event.clientY;
+    interaction.lastUserInputAt = performance.now();
+    canvas.setPointerCapture(event.pointerId);
+    document.body.classList.add("earth-dragging");
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!interaction.dragging) {
+      return;
+    }
+    const dx = event.clientX - interaction.lastX;
+    const dy = event.clientY - interaction.lastY;
+    interaction.lastX = event.clientX;
+    interaction.lastY = event.clientY;
+
+    if (Math.abs(dx) + Math.abs(dy) > 1.2) {
+      interaction.moved = true;
+    }
+
+    interaction.rotateY += dx * 0.0042;
+    interaction.rotateX += dy * 0.0026;
+    interaction.rotateX = THREE.MathUtils.clamp(interaction.rotateX, -0.38, 0.38);
+    interaction.lastUserInputAt = performance.now();
+  });
+
+  const releaseDrag = (event) => {
+    if (!interaction.dragging) {
+      return;
+    }
+    const wasMoved = interaction.moved;
+    interaction.dragging = false;
+    interaction.lastUserInputAt = performance.now();
+    document.body.classList.remove("earth-dragging");
+
+    if (interaction.pointerId !== null && canvas.hasPointerCapture(interaction.pointerId)) {
+      canvas.releasePointerCapture(interaction.pointerId);
+    }
+    interaction.pointerId = null;
+
+    if (wasMoved) {
+      return;
+    }
+
+    pointerToNdc(event);
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects([earthHit, neonHit, emberHit, earthMesh, neonMesh, emberMesh], false);
+    if (hits.length === 0) {
+      return;
+    }
+
+    const target = hits.find((hit) => hit.object.userData.themeKey) || hits[0];
+    const key = target.object.userData.themeKey || target.object.parent?.userData?.themeKey;
+    if (typeof key === "string") {
+      switchTheme(key);
+    }
+  };
+
+  canvas.addEventListener("pointerup", releaseDrag);
+  canvas.addEventListener("pointercancel", releaseDrag);
+
+  const clock = new THREE.Clock();
+
+  const animate = () => {
+    requestAnimationFrame(animate);
+    const delta = Math.min(clock.getDelta(), 0.05);
+    const now = performance.now();
+
+    const orbitEnabled = !interaction.dragging && now - interaction.lastUserInputAt > 5000;
+
+    if (orbitEnabled && !flight.active) {
+      interaction.autoYaw += delta * 0.06;
+      interaction.rotateY = THREE.MathUtils.lerp(interaction.rotateY, interaction.autoYaw, 0.015);
+      interaction.rotateX = THREE.MathUtils.lerp(interaction.rotateX, 0.06, 0.012);
+    }
+
+    updateOrbits(delta, orbitEnabled);
+
+    earthMesh.rotation.y += delta * 0.12;
+    if (cloudMesh) {
+      cloudMesh.rotation.y += delta * 0.16;
+    }
+    stars.rotation.y += delta * 0.01;
+
+    rings.forEach((ring, index) => {
+      ring.rotation.z += delta * (0.015 + index * 0.00015);
+      ring.material.opacity = 0.04 + Math.sin(now * 0.00045 + index * 0.2) * 0.01;
+    });
+
+    asteroids.forEach((asteroid, index) => {
+      asteroid.rotation.x += delta * asteroid.userData.spin;
+      asteroid.rotation.y += delta * asteroid.userData.spin * 0.7;
+      asteroid.position.x += Math.sin(now * 0.00028 + index * 0.6) * 0.0012;
+      asteroid.position.y += Math.cos(now * 0.00023 + index * 0.4) * 0.0009;
+    });
+
+    root.rotation.x = THREE.MathUtils.lerp(root.rotation.x, interaction.rotateX, 0.1);
+    root.rotation.y = THREE.MathUtils.lerp(root.rotation.y, interaction.rotateY, 0.1);
+
+    let focusTheme = currentTheme;
+    let transitionWarp = 0;
+
+    if (flight.active) {
+      const progress = THREE.MathUtils.clamp((now - flight.start) / flight.duration, 0, 1);
+      const eased = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      transitionWarp = Math.sin(progress * Math.PI);
+
+      if (progress >= 1) {
+        flight.active = false;
+        applyTheme(flight.to);
+        focusTheme = currentTheme;
+      } else {
+        focusTheme = eased < 0.5 ? flight.from : flight.to;
+      }
+    }
+
+    const activeSystem = systems[focusTheme] || systems.earth;
+    const lookTarget = getPlanetPosition(activeSystem.key);
+
+    const desiredDistance = activeSystem.key === "earth" ? 7.2 : 5.9;
+    const desiredY = activeSystem.key === "earth" ? 0.2 : 0.28;
+
+    const desiredPos = new THREE.Vector3(
+      lookTarget.x,
+      lookTarget.y + desiredY,
+      lookTarget.z + desiredDistance - transitionWarp * 0.8
+    );
+
+    cameraPos.lerp(desiredPos, flight.active ? 0.11 : 0.06);
+    cameraLook.lerp(lookTarget, flight.active ? 0.11 : 0.07);
+
+    camera.position.copy(cameraPos);
+    camera.fov = THREE.MathUtils.lerp(camera.fov, 43 + transitionWarp * 10, 0.12);
+    camera.updateProjectionMatrix();
+    camera.lookAt(cameraLook);
+
+    [systems.earth, systems.neon, systems.ember].forEach((planet) => {
+      const targetScale = planet.key === activeSystem.key ? (planet.key === "earth" ? 1 : 1.08) : 0.88;
+      planet.scale = THREE.MathUtils.lerp(planet.scale, targetScale, 0.08);
+      planet.anchor.scale.setScalar(planet.scale);
+    });
+
+    renderer.render(scene, camera);
+  };
+
+  animate();
+
+  const onResize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  };
+  window.addEventListener("resize", onResize);
+}
+
+async function boot() {
+  initReveal();
+  initTypeOnView();
+  initProjectShowcase();
+  initCodeTyping();
+  initPointerGlow();
+  initMentorOrbit();
+  applyTheme("earth");
+
+  const tracked = [];
+  let done = 0;
+
+  const track = (promise) => {
+    tracked.push(
+      promise.finally(() => {
+        done += 1;
+        setPreloaderProgress(done, tracked.length);
+      })
+    );
+    return promise;
+  };
+
+  const tasks = [
+    ["earthMap", loadTexture(assetUrls.earthMap)],
+    ["earthNormal", loadTexture(assetUrls.earthNormal)],
+    ["earthSpecular", loadTexture(assetUrls.earthSpecular)],
+    ["earthClouds", loadTexture(assetUrls.earthClouds)],
+    ["moonMap", loadTexture(assetUrls.moonMap)],
+    ["neptuneMap", loadTexture(assetUrls.neptuneMap)],
+    ["saturnMap", loadTexture(assetUrls.saturnMap)],
+    ["jupiterMap", loadTexture(assetUrls.jupiterMap)],
+    ["rocket", loadRocket(assetUrls.rocket)]
+  ];
+
+  const minDuration = prefersReducedMotion ? 400 : 1400;
+  const maxDuration = 6200;
+  const startAt = performance.now();
+
+  tasks.forEach(([key, promise]) => {
+    track(
+      promise.then((result) => {
+        if (key === "rocket") {
+          assets.rocket = result;
+        } else {
+          assets.textures[key] = result;
+        }
+      })
+    );
+  });
+
+  const stopPreloaderScene = initPreloaderScene();
+
+  let worldStarted = false;
+  const startWorld = () => {
+    if (worldStarted) {
+      return;
+    }
+    worldStarted = true;
+    initWorldScene();
+  };
+
+  const allDone = Promise.allSettled(tracked);
+
+  await Promise.race([
+    allDone,
+    new Promise((resolve) => window.setTimeout(resolve, maxDuration))
+  ]);
+
+  const elapsed = performance.now() - startAt;
+  const wait = Math.max(0, minDuration - elapsed);
+  if (wait > 0) {
+    await new Promise((resolve) => window.setTimeout(resolve, wait));
+  }
+
+  if (preloaderStatusNode) {
+    preloaderStatusNode.textContent = "Стыковка завершена";
+  }
+  if (preloaderFillNode) {
+    preloaderFillNode.style.width = "100%";
+  }
+
+  startWorld();
+  hidePreloader();
+
+  window.setTimeout(() => {
+    stopPreloaderScene();
+  }, 650);
+
+  window.setTimeout(() => {
+    if (document.body.classList.contains("show-preloader")) {
+      startWorld();
+      hidePreloader();
+      stopPreloaderScene();
+    }
+  }, 7000);
+}
+
+boot().catch((error) => {
+  console.error("Boot failure:", error);
+  hidePreloader();
+  applyTheme("earth");
+  initWorldScene();
+});
