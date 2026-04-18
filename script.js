@@ -6,8 +6,6 @@ const prefersReducedMotion = window.matchMedia(
 ).matches;
 const isMobileViewport = window.matchMedia("(max-width: 860px)").matches;
 
-document.body.classList.add("show-preloader");
-
 const yearNode = document.querySelector("#year");
 if (yearNode) {
   yearNode.textContent = String(new Date().getFullYear());
@@ -238,6 +236,7 @@ function finishPreloader() {
     preloaderMeterFillNode.style.width = "100%";
   }
   document.body.classList.remove("show-preloader");
+  document.body.classList.remove("js-ready");
   document.body.classList.add("site-live");
 
   if (preloaderNode && !preloaderNode.classList.contains("is-hidden")) {
@@ -271,6 +270,11 @@ Promise.allSettled(loadingPromises).then(() => {
 setTimeout(() => {
   bootSite();
 }, 3000);
+setTimeout(() => {
+  if (document.body.classList.contains("show-preloader")) {
+    finishPreloader();
+  }
+}, 6500);
 
 function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({

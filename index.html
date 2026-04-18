@@ -33,7 +33,7 @@
         visibility: visible;
       }
     </style>
-    <link rel="stylesheet" href="./styles.css?v=20260418-fix20" />
+    <link rel="stylesheet" href="./styles.css?v=20260418-fix21" />
   </head>
   <body class="theme-earth show-preloader js-ready">
     <div id="preloader" class="preloader">
@@ -173,18 +173,20 @@
           </div>
         </article>
 
-        <article class="mentor-log panel fx-neon">
-          <p class="eyebrow">Фокус текущей сессии</p>
-          <h3 id="mentor-title">Архитектурный менторинг</h3>
-          <p id="mentor-copy">
-            Разбираем системный дизайн, граничные сценарии и масштабирование решений.
+        <article class="project-showcase panel fx-prism" id="project-showcase">
+          <p class="eyebrow">Портфолио проектов</p>
+          <h3 id="project-focus-title">GrantFlow — грантовая платформа для молодых команд</h3>
+          <p id="project-focus-summary">
+            Платформа в формате ленты, где школьники, студенты и молодые энтузиасты публикуют проекты,
+            находят команду и получают экспертную поддержку.
           </p>
-          <ul id="mentor-priority" class="mentor-priority">
-            <li data-key="Архитектура">Архитектура</li>
-            <li data-key="Фронтенд">Фронтенд</li>
-            <li data-key="Бэкенд">Бэкенд</li>
-            <li data-key="Продукт">Продукт</li>
-          </ul>
+          <div class="project-switch">
+            <button class="project-chip is-active" data-project="grantflow">GrantFlow</button>
+            <button class="project-chip" data-project="mentorops">MentorOps</button>
+            <button class="project-chip" data-project="media">Media Growth</button>
+          </div>
+          <ul id="project-focus-points" class="project-focus-points"></ul>
+          <p id="project-focus-impact" class="project-focus-impact"></p>
         </article>
       </section>
 
@@ -203,20 +205,15 @@
           </div>
         </article>
 
-        <article class="project-showcase panel fx-prism" id="project-showcase">
-          <p class="eyebrow">Проекты и результат</p>
-          <h3 id="project-focus-title">GrantFlow — грантовая платформа для молодых команд</h3>
-          <p id="project-focus-summary">
-            Платформа в формате ленты, где школьники, студенты и молодые энтузиасты публикуют проекты,
-            находят команду и получают экспертную поддержку.
-          </p>
-          <div class="project-switch">
-            <button class="project-chip is-active" data-project="grantflow">GrantFlow</button>
-            <button class="project-chip" data-project="mentorops">MentorOps</button>
-            <button class="project-chip" data-project="media">Media Growth</button>
-          </div>
-          <ul id="project-focus-points" class="project-focus-points"></ul>
-          <p id="project-focus-impact" class="project-focus-impact"></p>
+        <article class="delivery-systems panel fx-neon">
+          <p class="eyebrow">Контур реализации</p>
+          <h3>Как я веду проект от гипотезы к рабочему продукту</h3>
+          <ul class="framework-list">
+            <li><b>Discovery:</b> фиксирую цель, ограничения и критерии результата.</li>
+            <li><b>Architecture:</b> выбираю стек осознанно: плюсы, минусы, риски роста.</li>
+            <li><b>Delivery:</b> управляю командой, ревью, качеством и ритмом релизов.</li>
+            <li><b>Scale:</b> подключаю автоматизацию, AI-инструменты и маркетинговый контур.</li>
+          </ul>
         </article>
       </section>
 
@@ -461,6 +458,6 @@
         });
       })();
     </script>
-    <script type="module" src="./script.js?v=20260418-fix20"></script>
+    <script type="module" src="./script.js?v=20260418-fix21"></script>
   </body>
 </html>
