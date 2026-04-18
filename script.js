@@ -520,8 +520,6 @@ function initEarthScene() {
   if (!earthCanvas) {
     return;
   }
-  const earthIntroStartMs = performance.now();
-
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
     43,
@@ -642,32 +640,32 @@ function initEarthScene() {
   const remoteDefs = [
     {
       key: "neon",
-      color: 0xd6efff,
-      glow: 0x8df7ff,
-      radius: 0.78,
-      baseY: 0.86,
-      mapKey: "neptuneAlbedo",
+      color: 0xf3f6ff,
+      glow: 0xb6dcff,
+      radius: 0.64,
+      baseY: 0.66,
+      mapKey: "jupiterAlbedo",
       normalKey: null,
-      roughness: 0.5,
-      metalness: 0.09,
-      orbitSpeed: 0.13,
-      orbitRadius: 13.4,
-      zBias: -7.1,
+      roughness: 0.62,
+      metalness: 0.06,
+      orbitSpeed: 0.1,
+      orbitRadius: 12.8,
+      zBias: -6.8,
       focusX: 2.56
     },
     {
       key: "ember",
-      color: 0xffe5c8,
-      glow: 0xffc47a,
-      radius: 0.74,
-      baseY: 0.52,
+      color: 0xf2e2d1,
+      glow: 0xf7c59a,
+      radius: 0.58,
+      baseY: 0.4,
       mapKey: "saturnAlbedo",
       normalKey: null,
-      roughness: 0.56,
-      metalness: 0.08,
-      orbitSpeed: -0.11,
-      orbitRadius: 12.6,
-      zBias: -7.5,
+      roughness: 0.64,
+      metalness: 0.05,
+      orbitSpeed: -0.08,
+      orbitRadius: 11.9,
+      zBias: -7.2,
       focusX: -2.5
     }
   ];
@@ -714,17 +712,7 @@ function initEarthScene() {
       def.baseY,
       Math.cos(slot.baseAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
     );
-    const halo = new THREE.Mesh(
-      new THREE.TorusGeometry(def.radius * 1.18, 0.04, 18, 92),
-      new THREE.MeshBasicMaterial({
-        color: def.glow,
-        transparent: true,
-        opacity: 0.35
-      })
-    );
-    halo.rotation.x = Math.PI * 0.45;
     anchor.add(body);
-    anchor.add(halo);
 
     const hitArea = new THREE.Mesh(
       new THREE.SphereGeometry(def.radius * 1.58, 20, 20),
@@ -745,7 +733,7 @@ function initEarthScene() {
     slot.anchor = anchor;
     slot.mesh = body;
     slot.baseY = def.baseY;
-    slot.halo = halo;
+    slot.halo = null;
     slot.hitArea = hitArea;
     slot.def = def;
     slot.defaultPos = anchor.position.clone();
@@ -762,7 +750,7 @@ function initEarthScene() {
     new THREE.MeshBasicMaterial({
       color: 0x5b9aff,
       transparent: true,
-      opacity: 0.08
+      opacity: 0.02
     })
   );
   orbitGuide.rotation.x = Math.PI * 0.5;
@@ -772,9 +760,9 @@ function initEarthScene() {
   const asteroidTracks = [];
   const asteroidBelt = new THREE.Group();
   worldRig.add(asteroidBelt);
-  const asteroidCount = isMobileViewport ? 5 : 10;
+  const asteroidCount = isMobileViewport ? 2 : 4;
   for (let i = 0; i < asteroidCount; i += 1) {
-    const size = 0.025 + Math.random() * 0.055;
+    const size = 0.018 + Math.random() * 0.028;
     const rock = new THREE.Mesh(
       new THREE.DodecahedronGeometry(size, 0),
       new THREE.MeshStandardMaterial({
@@ -830,39 +818,6 @@ function initEarthScene() {
       wobble: 0.18 + index * 0.08
     });
   });
-
-  const cometGroup = new THREE.Group();
-  const cometTail = new THREE.Mesh(
-    new THREE.ConeGeometry(0.1, 1.08, 20, 1, true),
-    new THREE.MeshBasicMaterial({
-      color: 0x8ed9ff,
-      transparent: true,
-      opacity: 0.24,
-      depthWrite: false
-    })
-  );
-  cometTail.rotation.z = -Math.PI * 0.5;
-  cometTail.position.x = -0.48;
-  const cometCore = new THREE.Mesh(
-    new THREE.SphereGeometry(0.09, 22, 22),
-    new THREE.MeshBasicMaterial({
-      color: 0xbaf0ff,
-      transparent: true,
-      opacity: 0.92
-    })
-  );
-  cometGroup.add(cometTail);
-  cometGroup.add(cometCore);
-  scene.add(cometGroup);
-
-  let rocket = null;
-  if (assets.rocket?.scene) {
-    rocket = assets.rocket.scene.clone(true);
-    rocket.scale.setScalar(0.11);
-    rocket.position.set(-3.2, 1.0, 1.8);
-    rocket.rotation.set(0.08, 1.1, -0.2);
-    scene.add(rocket);
-  }
 
   let dragActive = false;
   let dragDistance = 0;
@@ -1086,12 +1041,9 @@ function initEarthScene() {
     earthMesh.rotation.y += prefersReducedMotion ? 0.00024 : 0.001;
     cloudMesh.rotation.y += 0.0012;
     earthGroup.rotation.z = Math.sin(t * 0.18) * 0.03;
-    const earthTargetScale = activeTheme === "earth" ? 1 : 0.88;
-    const earthTargetPos =
-      activeTheme === "earth"
-        ? tmpTarget.set(0, 0, 0)
-        : tmpTarget.set(-2.15, -0.08, -2.62);
-    earthGroup.position.lerp(earthTargetPos, activeTheme === "earth" ? 0.06 : 0.08);
+    const earthTargetScale = 1;
+    const earthTargetPos = tmpTarget.set(0, 0, 0);
+    earthGroup.position.lerp(earthTargetPos, 0.08);
     earthGroup.scale.lerp(new THREE.Vector3(earthTargetScale, earthTargetScale, earthTargetScale), 0.08);
 
     asteroidTracks.forEach((item, index) => {
@@ -1145,22 +1097,7 @@ function initEarthScene() {
         def.baseY + Math.sin(orbitClock * 0.7 + index * 1.5) * 0.2,
         Math.cos(orbitAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
       );
-      const focusPos = new THREE.Vector3(
-        (def.focusX || 0) + Math.sin(t * 0.34 + index) * 0.1,
-        0.42 + Math.cos(t * 0.46 + index) * 0.08,
-        -2.84
-      );
-      const sidePos = new THREE.Vector3(
-        Math.sign(Math.sin(slot.baseAngle)) * 6.4,
-        1.02 + Math.sin(t * 0.3 + index * 2) * 0.11,
-        -7.4
-      );
-      const targetPos =
-        activeTheme === "earth"
-          ? orbitPos
-          : activeTheme === def.key
-            ? focusPos
-            : sidePos;
+      const targetPos = orbitPos;
       slot.anchor.position.lerp(targetPos, activeTheme === "earth" ? 0.05 : 0.09);
       const relative =
         THREE.MathUtils.euclideanModulo(worldRotationY + orbitAngle + Math.PI, Math.PI * 2) -
@@ -1177,10 +1114,10 @@ function initEarthScene() {
       slot.mesh.material.emissiveIntensity = 0.1 + frontness * 0.22 + focusBoost * 0.26;
       const targetScale =
         activeTheme === def.key
-          ? 0.76
+          ? 0.62
           : activeTheme === "earth"
-            ? 0.48 + frontness * 0.16
-            : 0.44 + frontness * 0.1;
+            ? 0.54 + frontness * 0.08
+            : 0.52 + frontness * 0.06;
       const currentScale = slot.mesh.scale.x;
       const nextScale = THREE.MathUtils.lerp(currentScale, targetScale, activeTheme === "earth" ? 0.05 : 0.08);
       slot.mesh.scale.setScalar(nextScale);
@@ -1203,76 +1140,18 @@ function initEarthScene() {
       flightBoost = 0;
     }
 
-    const targetCameraZ = activeTheme === "earth" ? 7.1 : 6.45;
-    const targetCameraX = activeTheme === "earth" ? 0 : 0.03;
-    const targetCameraY = activeTheme === "earth" ? 0.08 : 0.14;
+    const targetCameraZ = 7.1;
+    const targetCameraX = 0;
+    const targetCameraY = 0.08;
     camera.position.x += (targetCameraX - camera.position.x) * 0.09;
     camera.position.y += (targetCameraY - camera.position.y) * 0.09;
-    camera.position.z += (targetCameraZ - flightBoost * 1.05 - camera.position.z) * 0.1;
-    camera.fov += ((activeTheme === "earth" ? 43 : 41.2) + flightBoost * 5.4 - camera.fov) * 0.12;
+    camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
+    camera.fov += (43 - camera.fov) * 0.12;
     camera.updateProjectionMatrix();
-    if (activeTheme === "earth") {
-      cameraLookTarget.set(0, 0, 0);
-    } else {
-      const focusSlot = planetSystems.find((slot) => slot.key === activeTheme);
-      if (focusSlot?.anchor) {
-        focusSlot.anchor.getWorldPosition(cameraLookTarget);
-      } else {
-        cameraLookTarget.set(0, 0, 0);
-      }
-    }
+    cameraLookTarget.set(0, 0, 0);
     camera.lookAt(cameraLookTarget);
     stars.rotation.y += 0.006 + flightBoost * 0.03;
     stars.rotation.x = Math.sin(t * 0.12) * 0.04;
-
-    const cometProgress = THREE.MathUtils.euclideanModulo(t * 0.09, 1);
-    const cometArc = cometProgress * Math.PI * 2;
-    cometGroup.position.set(
-      Math.cos(cometArc) * 8.6,
-      2.1 + Math.sin(cometArc * 1.7) * 0.75,
-      -4.2 + Math.sin(cometArc) * 2.1
-    );
-    cometGroup.rotation.z = Math.sin(t * 1.9) * 0.35;
-    cometTail.material.opacity = 0.2 + Math.sin(t * 3.1) * 0.08;
-
-    if (rocket) {
-      const doc = document.documentElement;
-      const scrollProgress =
-        (doc.scrollTop || window.scrollY) /
-        Math.max(doc.scrollHeight - window.innerHeight, 1);
-      const landing = THREE.MathUtils.smoothstep(scrollProgress, 0.84, 0.985);
-      const introProgress = THREE.MathUtils.clamp(
-        (performance.now() - earthIntroStartMs) / 2600,
-        0,
-        1
-      );
-      const orbitOffset =
-        activeTheme === "neon" ? -1.8 : activeTheme === "ember" ? 1.8 : 0;
-
-      const roamX = Math.sin(t * 0.62) * 3.7 + orbitOffset;
-      const roamY = Math.cos(t * 0.41) * 1.3 + 0.82;
-      const roamZ = 1.4 + Math.sin(t * 0.92) * 0.75;
-      const landX = 0.2 + orbitOffset * 0.18;
-      const landY = -2.2;
-      const landZ = 2.2;
-      const missionX = THREE.MathUtils.lerp(roamX, landX, landing);
-      const missionY = THREE.MathUtils.lerp(roamY, landY, landing);
-      const missionZ = THREE.MathUtils.lerp(roamZ, landZ, landing);
-      const launchX = -8.8;
-      const launchY = 2.7;
-      const launchZ = 6.6;
-
-      rocket.position.x = THREE.MathUtils.lerp(launchX, missionX, introProgress);
-      rocket.position.y = THREE.MathUtils.lerp(launchY, missionY, introProgress);
-      rocket.position.z = THREE.MathUtils.lerp(launchZ, missionZ, introProgress);
-      rocket.rotation.y = THREE.MathUtils.lerp(1.55, THREE.MathUtils.lerp(1.2, -0.5, landing), introProgress);
-      rocket.rotation.z = THREE.MathUtils.lerp(
-        -0.28,
-        THREE.MathUtils.lerp(Math.sin(t * 0.8) * 0.2, -0.18, landing),
-        introProgress
-      );
-      rocket.rotation.x = THREE.MathUtils.lerp(0.22, THREE.MathUtils.lerp(0.08, 0.18, landing), introProgress);
-    }
 
     renderer.render(scene, camera);
   };

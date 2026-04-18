@@ -33,7 +33,7 @@
         visibility: visible;
       }
     </style>
-    <link rel="stylesheet" href="./styles.css?v=20260418-fix22" />
+    <link rel="stylesheet" href="./styles.css?v=20260418-fix23" />
   </head>
   <body class="theme-earth show-preloader js-ready">
     <div id="preloader" class="preloader">
@@ -51,31 +51,9 @@
 
     <div class="bg-world" aria-hidden="true">
       <canvas id="earth-canvas"></canvas>
-      <pre id="terminal-stream" class="terminal-stream"></pre>
       <div id="flight-overlay" class="flight-overlay">
         <div class="flight-overlay__warp"></div>
         <p id="flight-status">Гиперпереход...</p>
-      </div>
-
-      <div class="video-ribbon video-ribbon--top">
-        <video
-          preload="auto"
-          muted
-          loop
-          autoplay
-          playsinline
-          src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-city-at-night-11716-large.mp4"
-        ></video>
-      </div>
-      <div class="video-ribbon video-ribbon--bottom">
-        <video
-          preload="auto"
-          muted
-          loop
-          autoplay
-          playsinline
-          src="https://assets.mixkit.co/videos/preview/mixkit-glowing-particles-in-a-dark-background-9967-large.mp4"
-        ></video>
       </div>
     </div>
 
@@ -137,6 +115,10 @@
         <article class="mentor-orbit panel fx-ember fx-grid">
           <p class="eyebrow">Созвездие Наставников</p>
           <h2>С менторами усиливаю ключевое: архитектуру, продукт, стабильность и качество релиза</h2>
+          <p class="mentor-lead">
+            Этот блок показывает 4 зоны ответственности, которыми я закрываю риски проекта: от архитектуры
+            до продуктовых решений. Выбранный узел — текущий управленческий фокус.
+          </p>
           <div id="orbit-field" class="orbit-field">
             <button
               class="orbit-node is-active"
@@ -458,6 +440,6 @@
         });
       })();
     </script>
-    <script type="module" src="./script.js?v=20260418-fix22"></script>
+    <script type="module" src="./script.js?v=20260418-fix23"></script>
   </body>
 </html>

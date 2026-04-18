@@ -728,6 +728,12 @@ body.earth-dragging #earth-canvas {
   line-height: 1.13;
 }
 
+.mentor-lead {
+  margin-top: 0.72rem;
+  color: #b5cae8;
+  max-width: 64ch;
+}
+
 .orbit-field {
   position: relative;
   margin-top: 1rem;
