@@ -513,7 +513,7 @@ function triggerFlightOverlay(themeKey) {
   }
   flightOverlayTimer = setTimeout(() => {
     overlayNode.classList.remove("is-active");
-  }, prefersReducedMotion ? 420 : 980);
+  }, prefersReducedMotion ? 520 : 1450);
 }
 
 function initEarthScene() {
@@ -835,6 +835,9 @@ function initEarthScene() {
   let activeTheme = currentTheme;
   let revealEnergy = 0.12;
   let flightBoost = 0;
+  let travelStartAt = 0;
+  let travelDurationMs = prefersReducedMotion ? 420 : 1280;
+  let travelToTheme = "earth";
   let themeTravelUntil = 0;
   let manualControlUntil = 0;
   let autoOrbitPausedUntil = 0;
@@ -855,9 +858,11 @@ function initEarthScene() {
       return;
     }
     activeTheme = themeKey;
+    travelToTheme = themeKey;
+    travelStartAt = performance.now();
     applyTheme(themeKey);
-    flightBoost = 1.45;
-    themeTravelUntil = performance.now() + (prefersReducedMotion ? 420 : 1220);
+    flightBoost = 1.72;
+    themeTravelUntil = travelStartAt + travelDurationMs;
     manualControlUntil = performance.now() + 1200;
     autoOrbitPausedUntil = performance.now() + 1200;
     triggerFlightOverlay(themeKey);
@@ -1005,6 +1010,11 @@ function initEarthScene() {
     const nowMs = performance.now();
     const dt = Math.min(0.06, Math.max(0.001, (nowMs - prevFrameMs) / 1000));
     prevFrameMs = nowMs;
+    const travelActive = nowMs < themeTravelUntil;
+    const travelProgress = travelActive
+      ? THREE.MathUtils.clamp((nowMs - travelStartAt) / Math.max(travelDurationMs, 1), 0, 1)
+      : 1;
+    const travelWave = travelActive ? Math.sin(Math.PI * travelProgress) : 0;
     const autoOrbitActive = !dragActive && nowMs > autoOrbitPausedUntil;
     if (autoOrbitActive) {
       orbitClock += dt;
@@ -1020,7 +1030,16 @@ function initEarthScene() {
 
     worldRotationY += baseSpin + spinVelocity;
     spinVelocity *= dragActive ? 0.9 : 0.965;
-    if (!dragActive && activeTheme !== "earth" && nowMs > manualControlUntil) {
+    if (travelActive && travelToTheme !== "earth") {
+      const targetSlot = planetSystems.find((slot) => slot.key === travelToTheme);
+      if (targetSlot) {
+        const alignTarget = -(targetSlot.orbitAngle ?? targetSlot.baseAngle);
+        const diff =
+          THREE.MathUtils.euclideanModulo(alignTarget - worldRotationY + Math.PI, Math.PI * 2) -
+          Math.PI;
+        worldRotationY += diff * (0.07 + (1 - travelProgress) * 0.07);
+      }
+    } else if (!dragActive && activeTheme !== "earth" && nowMs > manualControlUntil) {
       const activeSlot = planetSystems.find((slot) => slot.key === activeTheme);
       if (activeSlot) {
         const alignTarget = -(activeSlot.orbitAngle ?? activeSlot.baseAngle);
@@ -1097,7 +1116,16 @@ function initEarthScene() {
         def.baseY + Math.sin(orbitClock * 0.7 + index * 1.5) * 0.2,
         Math.cos(orbitAngle) * (def.orbitRadius || remoteOrbitRadius) + (def.zBias || -2.5)
       );
-      const targetPos = orbitPos;
+      const focusBlend =
+        travelActive && activeTheme === def.key
+          ? THREE.MathUtils.smoothstep(travelProgress, 0.14, 0.86)
+          : 0;
+      const focusPos = new THREE.Vector3(
+        (def.focusX || 0) * 0.58 + Math.sin(t * 0.22 + index) * 0.08,
+        0.34 + Math.cos(t * 0.35 + index) * 0.05,
+        -4.7
+      );
+      const targetPos = orbitPos.clone().lerp(focusPos, focusBlend);
       slot.anchor.position.lerp(targetPos, activeTheme === "earth" ? 0.05 : 0.09);
       const relative =
         THREE.MathUtils.euclideanModulo(worldRotationY + orbitAngle + Math.PI, Math.PI * 2) -
@@ -1114,7 +1142,7 @@ function initEarthScene() {
       slot.mesh.material.emissiveIntensity = 0.1 + frontness * 0.22 + focusBoost * 0.26;
       const targetScale =
         activeTheme === def.key
-          ? 0.62
+          ? 0.62 + focusBlend * 0.24
           : activeTheme === "earth"
             ? 0.54 + frontness * 0.08
             : 0.52 + frontness * 0.06;
@@ -1130,9 +1158,8 @@ function initEarthScene() {
       }
     });
 
-    const travelActive = performance.now() < themeTravelUntil;
     if (travelActive) {
-      flightBoost = Math.max(flightBoost, 0.8 + Math.sin(t * 20) * 0.08);
+      flightBoost = Math.max(flightBoost, 1.08 + Math.sin(t * 28) * 0.2);
     }
     if (flightBoost > 0.001) {
       flightBoost *= 0.92;
@@ -1140,15 +1167,26 @@ function initEarthScene() {
       flightBoost = 0;
     }
 
-    const targetCameraZ = 7.1;
+    const targetCameraZ = 7.1 - travelWave * 1.08;
     const targetCameraX = 0;
-    const targetCameraY = 0.08;
+    const targetCameraY = 0.08 + travelWave * 0.06;
     camera.position.x += (targetCameraX - camera.position.x) * 0.09;
     camera.position.y += (targetCameraY - camera.position.y) * 0.09;
     camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
-    camera.fov += (43 - camera.fov) * 0.12;
+    camera.fov += (43 + travelWave * 8.4 - camera.fov) * 0.12;
     camera.updateProjectionMatrix();
     cameraLookTarget.set(0, 0, 0);
+    const lookBlend =
+      travelActive && activeTheme !== "earth"
+        ? THREE.MathUtils.smoothstep(travelProgress, 0.22, 0.86) * 0.68
+        : 0;
+    if (lookBlend > 0) {
+      const focusSlot = planetSystems.find((slot) => slot.key === activeTheme);
+      if (focusSlot?.anchor) {
+        focusSlot.anchor.getWorldPosition(tmpTarget);
+        cameraLookTarget.lerp(tmpTarget, lookBlend);
+      }
+    }
     camera.lookAt(cameraLookTarget);
     stars.rotation.y += 0.006 + flightBoost * 0.03;
     stars.rotation.x = Math.sin(t * 0.12) * 0.04;
@@ -1540,16 +1578,16 @@ function initProjectShowcase() {
 
   const projects = {
     grantflow: {
-      title: "GrantFlow — грантовый проект для молодёжных инициатив",
+      title: "Разработал площадку для молодёжных проектов при грантовой поддержке",
       summary:
-        "Платформа в формате ленты, где школьники, студенты и молодые энтузиасты публикуют идеи, находят команду, получают менторскую обратную связь и выходят к реальной реализации.",
+        "Ключевая ценность проекта: молодой автор быстрее переходит от идеи к команде и реализации, а не остаётся один на один с замыслом.",
       points: [
-        "Собрана ролевая модель: эксперты, авторы проектов, участники команд.",
-        "Снижен порог входа в проектную среду: всё в одном понятном пространстве.",
-        "Поддержка не только IT-направления: инженерные, социальные и образовательные проекты."
+        "Снизил порог входа в проектную среду: публикация идеи, поиск команды и запуск работы в одном месте.",
+        "Добавил раннюю экспертную обратную связь, чтобы слабые гипотезы отсеивались до затрат на разработку.",
+        "Открыл возможности не только IT-командам: инженерные, социальные и образовательные инициативы получили единый вход."
       ],
       impact:
-        "Польза: молодые команды быстрее переходят от идеи к рабочему проекту и получают реальный шанс на развитие через грантовую экосистему."
+        "Польза: больше молодёжных инициатив доходят до реальной реализации и получают шанс на рост через грантовую экосистему."
     },
     mentorops: {
       title: "MentorOps — система управления менторским контуром",
